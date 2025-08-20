@@ -17,7 +17,7 @@ from qtpy.QtWidgets import QAbstractSpinBox, QApplication, QDialog, QMenu, QWidg
 __all__ = ["qta_icon", "main"]
 
 __author__ = "StSav012"
-__original_name__ = "pycatsearch-qt"
+__original_name__ = "pycatsearch_qt"
 
 try:
     from ._version import __version__

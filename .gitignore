@@ -23,5 +23,5 @@ cdms_lite*.db.gz
 typograph.py
 
 /dist/
-/src/pycatsearch-qt/_version.py
-/src/pycatsearch-qt.egg-info/
+/src/pycatsearch_qt/_version.py
+/src/pycatsearch_qt.egg-info/
