@@ -3,7 +3,6 @@ from abc import ABCMeta
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from functools import partialmethod
-from os import PathLike
 from pathlib import Path
 from typing import Any
 
@@ -299,7 +298,7 @@ def qta_icon(*qta_name: str, **qta_specs: Any) -> QIcon:
     return QIcon()
 
 
-def main(*catalogs: "str | PathLike[str]") -> int:
+def main() -> int:
     import re
 
     # fix `re.RegexFlag.NOFLAG` missing on some systems
@@ -331,6 +330,16 @@ def main(*catalogs: "str | PathLike[str]") -> int:
             QApplication.installTranslator(my_translator)
             break
 
-    window: UI = UI(Catalog(*catalogs))
+    from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
+
+    ap: ArgumentParser = ArgumentParser(
+        allow_abbrev=True,
+        description="GUI for PyCatSearch.\n"
+        f"Find more at https://github.com/{__author__}/{__original_name__}.",
+    )
+    ap.add_argument("catalog", type=Path, help="the catalog location to load", nargs=ZERO_OR_MORE)
+    args: Namespace = ap.parse_intermixed_args()
+
+    window: UI = UI(Catalog(*args.catalog))
     window.show()
     return app.exec()
