@@ -50,7 +50,7 @@ jobs:
       url: https://pypi.org/p/pycatsearch-qt
 
     permissions:
-      id-token: ${{ secrets.PYPI_API_TOKEN }}
+      id-token: write
 
     steps:
       - name: Download all the dists
@@ -73,7 +73,7 @@ jobs:
       url: https://test.pypi.org/p/pycatsearch-qt
 
     permissions:
-      id-token: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      id-token: write
 
     steps:
       - name: Download all the dists
