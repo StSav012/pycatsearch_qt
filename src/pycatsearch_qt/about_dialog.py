@@ -72,6 +72,8 @@ class AboutBox(QDialog):
                 except PackageNotFoundError:
                     third_party_modules.append((module_name, getattr(module, "__version__", "")))
         if third_party_modules:
+            if not any(m[0] == "pycatsearch" for m in third_party_modules):
+                third_party_modules.append(("PyCatSearch", version("pycatsearch")))
             td_tag: partial[str] = partial(tag, "td")
             tr_tag: partial[str] = partial(tag, "tr")
             th_tag: partial[str] = partial(tag, "th", scope="col")
