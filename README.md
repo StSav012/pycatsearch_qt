@@ -4,7 +4,10 @@ A Qt-based GUI for [PyCatSearch](https://github.com/stsav012/pycatsearch).
 
 ## Requirements
 
-The code is developed under `python 3.13`. It should work under `python 3.8` but merely tested.
+The code is developed under `Python 3.13`.
+
+It should work under `Python 3.8` but is uninstallable there bue to changes in `setuptools`.
+Still, you can get the source files and try them under `Python 3.8`.
 
 The GUI requires Python bindings for Qt (`PyQt5`, `PySide6`, `PyQt6`, or `PySide2`), picked by `QtPy`.
 
