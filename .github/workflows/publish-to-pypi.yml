@@ -19,9 +19,6 @@ jobs:
       with:
         python-version: "3.x"
 
-    - name: Get species list
-      run: python "download species list.py"
-
     - name: Install pypa/build
       run: >-
         python -m
@@ -33,6 +30,7 @@ jobs:
       run: >-
         python -m
         build
+        --sdist
         --outdir dist/
         .
     - name: Publish distribution to Test PyPI
