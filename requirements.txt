@@ -1,3 +1,5 @@
+PyCatSearch
+
 # for the compatibility b/w various Qt versions
 QtPy>=2.3.1
 
