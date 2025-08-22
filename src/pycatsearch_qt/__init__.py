@@ -99,6 +99,8 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             lines.insert(0, "from __future__ import annotations")
             new_text: str = "\n".join(lines)
             new_text = new_text.replace("ParamSpec", "TypeVar")
+            if f.resolve() != me:
+                new_text = new_text.replace("__file__", repr(str(f.resolve())))
             parts: "tuple[str, ...]" = f.relative_to(my_parent).parts
             p: "dict[str, str | dict]" = py38_modules
             for part in parts[:-1]:
@@ -334,8 +336,7 @@ def main() -> int:
 
     ap: ArgumentParser = ArgumentParser(
         allow_abbrev=True,
-        description="GUI for PyCatSearch.\n"
-        f"Find more at https://github.com/{__author__}/{__original_name__}.",
+        description=f"GUI for PyCatSearch.\nFind more at https://github.com/{__author__}/{__original_name__}.",
     )
     ap.add_argument("catalog", type=Path, help="the catalog location to load", nargs=ZERO_OR_MORE)
     args: Namespace = ap.parse_intermixed_args()
