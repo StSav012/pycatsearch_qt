@@ -39,6 +39,7 @@ pycatsearch-qt = 'pycatsearch_qt:main'
 
 [tool.setuptools_scm]
 local_scheme = 'no-local-version'
+version_scheme = 'no-guess-dev'
 write_to = 'src/pycatsearch_qt/_version.py'
 
 [tool.setuptools.dynamic]
