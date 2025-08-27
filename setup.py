@@ -82,7 +82,7 @@ def required_packages() -> list[str]:
         ]
 
     requirements: list[PackageRequirement | Sequence[PackageRequirement]] = [
-        PackageRequirement(package_name="pycatsearch"),
+        PackageRequirement(package_name="pycatsearch", min_version="5.2.3"),
         qt_list,
         PackageRequirement(package_name="qtpy", min_version="2.4.1"),
     ]
