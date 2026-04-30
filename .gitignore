@@ -25,3 +25,4 @@ typograph.py
 /dist/
 /src/pycatsearch_qt/_version.py
 /src/pycatsearch_qt.egg-info/
+/uv.lock
