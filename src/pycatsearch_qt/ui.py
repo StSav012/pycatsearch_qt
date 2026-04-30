@@ -60,7 +60,9 @@ __all__ = ["UI"]
 
 
 def copy_to_clipboard(text: str, text_type: Qt.TextFormat | str = Qt.TextFormat.PlainText) -> None:
-    clipboard: QClipboard = QApplication.clipboard()
+    clipboard: QClipboard | None = QApplication.clipboard()
+    if clipboard is None:
+        return
     if not text:
         return
     mime_data: QMimeData = QMimeData()
