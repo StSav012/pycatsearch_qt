@@ -1,4 +1,5 @@
 import enum
+from datetime import timedelta
 from pathlib import Path
 from typing import Iterable, cast
 
@@ -129,7 +130,9 @@ class SourcesList(QTableWidget):
             self.setItem(row, SourcesList.Columns.FileLocation, item)
             if info_item.build_datetime is not None:
                 qt_datetime: QDateTime = QDateTime(info_item.build_datetime)
-                qt_datetime.setTimeZone(QTimeZone(round(info_item.build_datetime.utcoffset().total_seconds())))
+                utcoffset: timedelta | None = info_item.build_datetime.utcoffset()
+                if utcoffset is not None:
+                    qt_datetime.setTimeZone(QTimeZone(round(utcoffset.total_seconds())))
                 item = QTableWidgetItem(qt_datetime.toLocalTime().toString())
                 self.setItem(row, SourcesList.Columns.BuildTime, item)
         self.setColumnHidden(

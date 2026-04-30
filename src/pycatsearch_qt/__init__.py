@@ -74,8 +74,9 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             target: "ModuleType | None" = None,
         ) -> "ModuleSpec | None":
             if fullname in self._modules:
-                spec: ModuleSpec = spec_from_file_location(fullname, loader=self._loader)
-                spec.origin = "<string>"
+                spec: ModuleSpec | None = spec_from_file_location(fullname, loader=self._loader)
+                if spec is not None:
+                    spec.origin = "<string>"
                 return spec
             return None
 
@@ -106,6 +107,8 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             for part in parts[:-1]:
                 if part not in p:
                     p[part] = {}
+                if not isinstance(p[part], dict):
+                    continue
                 p = p[part]
             p[parts[-1][: -len(me.suffix)]] = new_text
 

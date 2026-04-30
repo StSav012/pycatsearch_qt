@@ -1,6 +1,7 @@
+import os
 import sys
 from math import inf
-from pathlib import Path
+from pathlib import PurePath
 from typing import Any, final
 
 from pycatsearch.catalog import Catalog
@@ -293,7 +294,7 @@ class UI(QMainWindow):
         self.save_settings()
         event.accept()
 
-    def load_catalog(self, *catalog_file_names: Path) -> bool:
+    def load_catalog(self, *catalog_file_names: str | os.PathLike[str]) -> bool:
         if not catalog_file_names:
             return not self.catalog.is_empty
 
@@ -362,7 +363,7 @@ class UI(QMainWindow):
     @Slot()
     def _on_action_load_triggered(self) -> None:
         self.status_bar.showMessage(self.tr("Select a catalog file to load."))
-        new_catalog_filenames: list[str] = self.open_dialog.get_open_filenames()
+        new_catalog_filenames: list[str | os.PathLike[str]] = self.open_dialog.get_open_filenames()
 
         if new_catalog_filenames:
             self.status_bar.showMessage(self.tr("Loading…"))
@@ -382,7 +383,7 @@ class UI(QMainWindow):
     def _on_action_save_as_triggered(self) -> None:
         catalog: CatalogType = self.catalog.catalog
         frequency_limits: tuple[float, float] = (self.catalog.min_frequency, self.catalog.max_frequency)
-        save_filename: Path | None
+        save_filename: PurePath | None
         while True:
             if not (save_filename := self.save_dialog.get_save_filename()):
                 return
@@ -509,7 +510,7 @@ class UI(QMainWindow):
             self.results_table.selectionModel().currentIndex()
         ]:
             if index.isValid():
-                text_to_copy.append(self.results_model.data(index))
+                text_to_copy.append(self.results_model.data(index) or "")
         if not text_to_copy:
             return
         if col == 0:
@@ -671,11 +672,12 @@ class UI(QMainWindow):
                 self.toggle_results_table_column_visibility(column, is_visible)
 
         # Fallback: Center the window
-        screen: QScreen = QApplication.primaryScreen()
-        self.move(
-            round(0.5 * (screen.size().width() - self.size().width())),
-            round(0.5 * (screen.size().height() - self.size().height())),
-        )
+        screen: QScreen | None = QApplication.primaryScreen()
+        if screen is not None:
+            self.move(
+                round(0.5 * (screen.size().width() - self.size().width())),
+                round(0.5 * (screen.size().height() - self.size().height())),
+            )
 
         self.settings.restore(self)
         self.settings.restore(self._top_matter)

@@ -127,10 +127,10 @@ class FoundLinesModel(QAbstractTableModel):
             unit=self._settings.energy_unit_str,
         )
 
-    def rowCount(self, parent: QModelIndex | QPersistentModelIndex = ...) -> int:
+    def rowCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
         return min(len(self._data), self._rows_loaded)
 
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex = ...) -> int:
+    def columnCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
         return len(self._header)
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> str | None:
@@ -151,12 +151,23 @@ class FoundLinesModel(QAbstractTableModel):
     def row(self, row_index: int) -> DataType:
         return self._data[row_index]
 
-    def headerData(self, col: int, orientation: Qt.Orientation, role: int = ...) -> str | None:
+    def headerData(
+        self,
+        col: int,
+        orientation: Qt.Orientation,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> str | None:
         if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self._header[col]
         return None
 
-    def setHeaderData(self, section: int, orientation: Qt.Orientation, value: str, role: int = ...) -> bool:
+    def setHeaderData(
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        value: str,
+        role: int = Qt.ItemDataRole.DisplayRole,
+    ) -> bool:
         if (
             orientation == Qt.Orientation.Horizontal
             and role == Qt.ItemDataRole.DisplayRole

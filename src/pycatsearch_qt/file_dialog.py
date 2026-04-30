@@ -2,7 +2,7 @@ import mimetypes
 import re
 from importlib.util import find_spec
 from os import PathLike
-from pathlib import Path
+from pathlib import PurePath
 from typing import Collection, NamedTuple, Sequence, cast
 
 from qtpy.QtCore import QObject, Slot
@@ -54,7 +54,7 @@ class FileDialog(QFileDialog):
             if not new_selected_filter_suffixes:
                 return
             selected_filter_suffixes: tuple[str, ...] = self._extensions_from_filter(self._selected_filter)
-            selected_file: Path | None = self.selectedFile()
+            selected_file: PurePath | None = self.selectedFile()
             if selected_file is None:
                 return
             if not selected_file.name.endswith(new_selected_filter_suffixes):
@@ -82,9 +82,9 @@ class FileDialog(QFileDialog):
     def selectFile(self, filename: str | PathLike[str]) -> None:
         return super().selectFile(str(filename))
 
-    def selectedFile(self) -> Path | None:
+    def selectedFile(self) -> PurePath | None:
         if selected_files := super().selectedFiles():
-            sf: Path = Path(selected_files[0])
+            sf: PurePath = PurePath(selected_files[0])
             expected_suffixes: tuple[str, ...] = self._extensions_from_filter(self.selectedNameFilter())
             if expected_suffixes and not sf.name.endswith(expected_suffixes):
                 sf = sf.with_name(sf.name + expected_suffixes[0])
@@ -137,6 +137,7 @@ class OpenFileDialog(FileDialog):
 
         supported_name_filters_names: list[str] = []
         supported_name_filters: list[OpenFileDialog.SupportedNameFilterItem] = []
+        supported_name_filter: OpenFileDialog.SupportedNameFilterItem
         for supported_name_filter in self.supported_name_filters:
             if not supported_name_filter.required_packages or any(
                 find_spec(package) for package in supported_name_filter.required_packages
@@ -181,10 +182,10 @@ class OpenFileDialog(FileDialog):
             self.setDefaultSuffix(all_extensions[0])
         self.setNameFilters(name_filters)
 
-    def get_open_filename(self) -> Path | None:
+    def get_open_filename(self) -> PurePath | None:
         self._fill_filters()
 
-        opened_filename: Path | None
+        opened_filename: PurePath | None
         if opened_filename := self.settings.opened_file_name:
             self.selectFile(opened_filename)
             self.setDirectory(str(opened_filename.parent))
@@ -201,7 +202,7 @@ class OpenFileDialog(FileDialog):
     def get_open_filenames(self) -> list[str | PathLike[str]]:
         self._fill_filters()
 
-        opened_filename: Path | None
+        opened_filename: PurePath | None
         if opened_filename := self.settings.opened_file_name:
             self.selectFile(opened_filename)
             self.setDirectory(str(opened_filename.parent))
@@ -228,13 +229,13 @@ class SaveFileDialog(FileDialog):
 
         self.setObjectName("saveFileDialog")
 
-    def get_save_filename(self) -> Path | None:
+    def get_save_filename(self) -> PurePath | None:
         mimetypes.init()
 
         _space_before_extensions: str = " " * (not self.testOption(QFileDialog.Option.HideNameFilterDetails))
 
-        filename: Path | None = self.settings.saved_file_name
-        opened_filename: Path | None = self.settings.opened_file_name
+        filename: PurePath | None = self.settings.saved_file_name
+        opened_filename: PurePath | None = self.settings.opened_file_name
 
         filename_mimetype: str | None = (
             mimetypes.guess_type(filename, strict=False)[0] if filename is not None else None
@@ -249,6 +250,7 @@ class SaveFileDialog(FileDialog):
 
         supported_name_filters: list[str] = []
         all_extensions: set[str] = set()
+        supported_name_filter: SaveFileDialog.SupportedNameFilterItem
         for supported_name_filter in self.supported_name_filters:
             if not supported_name_filter.required_packages or any(
                 find_spec(package) for package in supported_name_filter.required_packages
@@ -280,7 +282,11 @@ class SaveFileDialog(FileDialog):
                     all_extensions.add(supported_mimetype_filter.file_extension)
                     if filename_mimetype is not None and filename_mimetype == mimetype:
                         selected_mimetype = mimetype
-                        if not selected_ext and (ext := mimetypes.guess_extension(selected_mimetype, strict=False)):
+                        if (
+                            selected_mimetype is not None
+                            and not selected_ext
+                            and (ext := mimetypes.guess_extension(selected_mimetype, strict=False))
+                        ):
                             selected_ext = ext
 
         if not supported_name_filters and not supported_mimetypes:
@@ -304,8 +310,7 @@ class SaveFileDialog(FileDialog):
                 selected_ext = selected_filter_ext[0]
                 self.setDefaultSuffix(selected_ext)
 
-        expected_file: Path
-        if expected_file := (filename or opened_filename):
+        if (expected_file := (filename or opened_filename)) is not None:
             self.setDirectory(str(expected_file.parent))
             if opened_filename:
                 expected_file = expected_file.with_name(opened_filename.name)

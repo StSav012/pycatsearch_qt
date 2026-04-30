@@ -118,8 +118,11 @@ class Settings(QSettings):
     def dialog(
         self,
     ) -> dict[
-        str | tuple[str, tuple[str, ...]] | tuple[str, tuple[str, ...], tuple[tuple[str, Any], ...]],
-        dict[str, CallbackOnly | PathCallbackOnly | SpinboxAndCallback | ComboboxAndCallback],
+        tuple[str, tuple[str, ...]] | tuple[str, tuple[str, ...], object],
+        dict[str, CallbackOnly]
+        | dict[str, ComboboxAndCallback]
+        | dict[str, CallbackOnly | ComboboxAndCallback]
+        | dict[str, EditableComboboxAndCallback],
     ]:
         return {
             (self.tr("When the program starts"), ("mdi6.rocket-launch",)): {

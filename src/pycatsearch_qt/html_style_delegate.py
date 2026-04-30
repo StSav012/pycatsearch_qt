@@ -13,11 +13,13 @@ class HTMLDelegate(QStyledItemDelegate):
         index: QModelIndex | QPersistentModelIndex,
     ) -> None:
         self.initStyleOption(option, index)
-        style: QStyle
+        style: QStyle | None
         if option.widget:
             style = option.widget.style()
         else:
             style = QApplication.style()
+        if style is None:
+            raise RuntimeError("Failed to get style")
         doc: QTextDocument = QTextDocument()
         doc.setHtml(option.text)
         option.text = ""
@@ -33,7 +35,7 @@ class HTMLDelegate(QStyledItemDelegate):
         doc.documentLayout().draw(painter, ctx)
         painter.restore()
 
-    def sizeHint(self, option: QStyleOptionViewItem | None, index: QModelIndex | QPersistentModelIndex) -> QSize:
+    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex | QPersistentModelIndex) -> QSize:
         options: QStyleOptionViewItem = QStyleOptionViewItem(option)
         self.initStyleOption(options, index)
         doc: QTextDocument = QTextDocument()
