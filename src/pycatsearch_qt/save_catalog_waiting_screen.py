@@ -18,7 +18,7 @@ class SaveCatalogWaitingScreen(WaitingScreen):
         catalog: CatalogType,
         frequency_limits: tuple[float, float],
         margins: int | QMargins | None = None,
-    ) -> WaitingScreen:
+    ) -> WaitingScreen[bool]:
         return WaitingScreen(
             parent=parent,
             label=QCoreApplication.translate("SaveCatalogWaitingScreen", "Please wait…"),

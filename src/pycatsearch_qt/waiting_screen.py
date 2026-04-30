@@ -1,5 +1,5 @@
 from threading import Thread
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Generic, Mapping, Sequence, TypeVar
 
 from qtpy.QtCore import QCoreApplication, QEventLoop, QMargins, QSize, Qt
 from qtpy.QtGui import QKeySequence
@@ -25,22 +25,25 @@ def _spinner(parent: QWidget | None = None) -> QWidget | None:
     return None
 
 
-class _Thread(Thread):
+_T = TypeVar("_T")
+
+
+class _Thread(Thread, Generic[_T]):
     def __init__(
         self,
-        target: Callable | None,
+        target: Callable[..., _T] | None,
         args: Sequence[object],
         kwargs: Mapping[str, object],
     ) -> None:
         super().__init__(daemon=True)
 
-        self._target: Callable | None = target
+        self._target: Callable[..., _T] | None = target
         self._args: Sequence[Any] = args
         self._kwargs: Mapping[str, Any] = kwargs or dict()
 
-        self._result: object = None
+        self._result: _T | None = None
 
-    def result(self) -> object:
+    def result(self) -> _T | None:
         return self._result
 
     def run(self) -> None:
@@ -55,12 +58,12 @@ class _Thread(Thread):
                     traceback.print_tb(*sys.exc_info())
 
 
-class WaitingScreen(QWidget):
+class WaitingScreen(QWidget, Generic[_T]):
     def __init__(
         self,
         parent: QWidget | None,
         label: str | QWidget,
-        target: Callable | None = None,
+        target: Callable[..., _T] | None = None,
         args: Sequence[Any] = (),
         kwargs: Mapping[str, Any] | None = None,
         margins: int | QMargins | None = None,
@@ -92,17 +95,17 @@ class WaitingScreen(QWidget):
         elif isinstance(margins, QMargins):
             layout.setContentsMargins(margins)
 
-        self._target: Callable | None = target
+        self._target: Callable[..., _T] | None = target
         self._args: Sequence[Any] = args
         self._kwargs: Mapping[str, Any] = kwargs or dict()
-        self._thread: Thread | None = None
+        self._thread: _Thread[_T] | None = None
         self._is_cancelled: bool = False
 
     @property
     def active(self) -> bool:
         return self._thread is not None and self._thread.is_alive()
 
-    def exec(self) -> object:
+    def exec(self) -> _T | None:
         self._is_cancelled = False
         self._thread = _Thread(target=self._target, args=self._args, kwargs=self._kwargs)
         self.show()
@@ -137,6 +140,6 @@ if __name__ == "__main__":
     app: QApplication = QApplication(sys.argv)
     w: QWidget = QWidget()
     w.show()
-    ws: WaitingScreen = WaitingScreen(parent=w, label="label", target=sleep, args=(5,))
+    ws: WaitingScreen[None] = WaitingScreen(parent=w, label="label", target=sleep, args=(5,))
     QTimer().singleShot(100, lambda: print(f"{ws.exec() = }"))
     app.exec()

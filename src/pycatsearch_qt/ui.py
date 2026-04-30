@@ -317,14 +317,14 @@ class UI(QMainWindow):
             )
         else:
             label = tag("html", p_tag(self.tr("Loading a catalog from<br>{}").format(catalog_file_names[0])))
-        ws: WaitingScreen = WaitingScreen(
+        ws: WaitingScreen[Catalog] = WaitingScreen(
             parent=self,
             label=label,
             target=Catalog,
             args=catalog_file_names,
             label_alignment=Qt.AlignmentFlag.AlignLeading,
         )
-        cat: object | Catalog = ws.exec()
+        cat: Catalog | None = ws.exec()
         if cat is None or cat.is_empty:
             if ws.is_cancelled():
                 self.status_bar.showMessage(self.tr("Loading has been cancelled."))
