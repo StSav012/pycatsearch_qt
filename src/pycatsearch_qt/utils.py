@@ -294,7 +294,7 @@ def latest_release() -> ReleaseInfo:
         )
     except URLError:
         return ReleaseInfo()
-    if r.getcode() != 200 or not r.readable():
+    if r.status != 200 or not r.readable():
         return ReleaseInfo()
     rss: dom.Node | None = dom.parseString(r.read().decode(encoding="ascii")).documentElement
     if not isinstance(rss, dom.Element) or rss.tagName != "rss":
