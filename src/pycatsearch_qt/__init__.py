@@ -304,6 +304,17 @@ def qta_icon(*qta_name: str, **qta_specs: Any) -> QIcon:
 
 
 def main() -> int:
+    from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
+
+    ap: ArgumentParser = ArgumentParser(
+        allow_abbrev=True,
+        description=f"GUI for PyCatSearch.\nFind more at https://github.com/{__author__}/{__original_name__}.",
+    )
+    if __version__:
+        ap.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
+    ap.add_argument("catalog", type=Path, help="the catalog location to load", nargs=ZERO_OR_MORE)
+    args: Namespace = ap.parse_intermixed_args()
+
     import re
 
     # fix `re.RegexFlag.NOFLAG` missing on some systems
@@ -334,17 +345,6 @@ def main() -> int:
         if my_translator.load(language, str(Path(__file__).parent / "i18n")):
             QApplication.installTranslator(my_translator)
             break
-
-    from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
-
-    ap: ArgumentParser = ArgumentParser(
-        allow_abbrev=True,
-        description=f"GUI for PyCatSearch.\nFind more at https://github.com/{__author__}/{__original_name__}.",
-    )
-    if __version__:
-        ap.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
-    ap.add_argument("catalog", type=Path, help="the catalog location to load", nargs=ZERO_OR_MORE)
-    args: Namespace = ap.parse_intermixed_args()
 
     window: UI = UI(Catalog(*args.catalog))
     window.show()
