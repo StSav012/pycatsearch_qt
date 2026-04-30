@@ -338,6 +338,8 @@ def main() -> int:
         allow_abbrev=True,
         description=f"GUI for PyCatSearch.\nFind more at https://github.com/{__author__}/{__original_name__}.",
     )
+    if __version__:
+        ap.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     ap.add_argument("catalog", type=Path, help="the catalog location to load", nargs=ZERO_OR_MORE)
     args: Namespace = ap.parse_intermixed_args()
 
