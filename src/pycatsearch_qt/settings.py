@@ -84,8 +84,8 @@ class Settings(QSettings):
         "https://webbook.nist.gov/cgi/cbook.cgi?InChI={InChIKey}",
         "https://www.spectrabase.com/search?q={InChIKey}",
         "https://www.google.com/search?q={InChIKey}",
-        "http://gmd.mpimp-golm.mpg.de/search.aspx?query={InChIKey}",
-        "http://www.chemspider.com/InChIKey/{InChIKey}",
+        "https://www.chemspider.com/InChIKey/{InChIKey}",
+        "http://gmd.mpimp-golm.mpg.de/search.aspx?query={InChIKey}",  # unsecure
     ]
 
     def __init__(self, organization: str, application: str, parent: QObject | None = None) -> None:
