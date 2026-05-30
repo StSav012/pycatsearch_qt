@@ -7,7 +7,8 @@ site.main()
 
 def required_packages() -> list[str]:
     import platform
-    from typing import Collection, NamedTuple, Sequence
+    from collections.abc import Collection, Sequence
+    from typing import NamedTuple
 
     from packaging.version import Version
 
@@ -37,14 +38,12 @@ def required_packages() -> list[str]:
         return True
 
     def required_package(package_requirement: PackageRequirement | Sequence[PackageRequirement]) -> PackageRequirement:
-        """
-        Install packages if missing
+        """Install packages if missing.
 
         :param package_requirement: A package name or a sequence of the alternative packages names;
                              if none of the packages installed beforehand, install the first one given
         :returns bool: `True` if a package is importable, `False` when an attempt to install the package is made
         """
-
         if not package_requirement:
             raise ValueError("No package requirements given")
 

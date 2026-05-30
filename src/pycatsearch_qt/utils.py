@@ -3,7 +3,9 @@ import html.entities
 import itertools
 import os
 import sys
-from typing import Any, Iterable
+from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
+from typing import Any
 
 from pycatsearch.utils import NAME, STOICHIOMETRIC_FORMULA, STRUCTURAL_FORMULA, CatalogEntryType
 
@@ -22,8 +24,8 @@ __all__ = [
 
 
 def tex_to_html_entity(s: str) -> str:
-    r"""
-    Change LaTeX entities syntax to HTML one.
+    r"""Change LaTeX entities syntax to HTML one.
+
     Get ‘\alpha’ to be ‘&alpha;’ and so on.
     Unknown LaTeX entities do not get replaced.
 
@@ -63,7 +65,7 @@ def tex_to_html_entity(s: str) -> str:
 
 
 def chem_html(formula: str) -> str:
-    """converts plain text chemical formula into html markup"""
+    """Convert plain text chemical formula into HTML markup."""
     if "<" in formula or ">" in formula:
         # we can not tell whether it's a tag or a mathematical sign
         return formula
@@ -149,12 +151,11 @@ def chem_html(formula: str) -> str:
             break
         for function in (subscript, prefix, charge):
             html_formula_pieces[i] = function(html_formula_pieces[i])
-    html_formula = ", ".join(html_formula_pieces)
-    return html_formula
+    return ", ".join(html_formula_pieces)
 
 
 def is_good_html(text: str) -> bool:
-    """Basic check that all tags are sound"""
+    """Check that all tags are sound."""
     _1, _2, _3 = text.count("<"), text.count(">"), 2 * text.count("</")
     return _1 == _2 and _1 == _3
 
@@ -175,16 +176,14 @@ def best_name(entry: CatalogEntryType, allow_html: bool = True) -> str:
                         # span tags are needed when the molecule symbol is malformed
                         return f"<span>{molecule_symbol}</span>, {chem_html(tex_to_html_entity(str(state_html)))}"
                     return str(molecule_symbol)
-                else:
-                    if state_html := entry.state_html:
-                        return f"{chem_html(str(isotopolog))}, {chem_html(tex_to_html_entity(str(state_html)))}"
-                    return chem_html(str(isotopolog))
-            else:
                 if state_html := entry.state_html:
-                    return f"{isotopolog}, {remove_html(tex_to_html_entity(state_html))}"
-                if state := entry.state:
-                    return f"{isotopolog}, {remove_html(tex_to_html_entity(state.strip('$')))}"
-                return isotopolog
+                    return f"{chem_html(str(isotopolog))}, {chem_html(tex_to_html_entity(str(state_html)))}"
+                return chem_html(str(isotopolog))
+            if state_html := entry.state_html:
+                return f"{isotopolog}, {remove_html(tex_to_html_entity(state_html))}"
+            if state := entry.state:
+                return f"{isotopolog}, {remove_html(tex_to_html_entity(state.strip('$')))}"
+            return isotopolog
 
         for key in (NAME, STRUCTURAL_FORMULA, STOICHIOMETRIC_FORMULA):
             if candidate := getattr(entry, key, ""):
@@ -207,7 +206,7 @@ def best_name(entry: CatalogEntryType, allow_html: bool = True) -> str:
 
 
 def remove_html(line: str) -> str:
-    """removes HTML tags and decodes HTML entities"""
+    """Remove HTML tags and decode HTML entities."""
     if not is_good_html(line):
         return html.unescape(line)
 
@@ -222,7 +221,7 @@ def remove_html(line: str) -> str:
 
 
 def wrap_in_html(text: str, line_end: str = os.linesep) -> str:
-    """Make a full HTML document out of a piece of the markup"""
+    """Make a full HTML document out of a piece of the markup."""
     new_text: list[str] = [
         '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">',
         '<html lang="en" xml:lang="en">',
@@ -246,7 +245,7 @@ class ReleaseInfo:
     def __bool__(self) -> bool:
         return bool(self.version) and bool(self.pub_date)
 
-    def __lt__(self, other: Any) -> bool:
+    def __lt__(self, other: object) -> bool:
         if not isinstance(other, (str, ReleaseInfo)):
             raise TypeError("The argument must be a string or ReleaseInfo")
         if isinstance(other, str):
@@ -260,18 +259,16 @@ class ReleaseInfo:
                 continue
             if i.isdigit() and j.isdigit():
                 return int(i) < int(j)
-            else:
-                i_digits: str = "".join(itertools.takewhile(str.isdigit, i))
-                j_digits: str = "".join(itertools.takewhile(str.isdigit, j))
-                if i_digits != j_digits:
-                    if i_digits and j_digits:
-                        return int(i_digits) < int(j_digits)
-                    else:
-                        return i_digits < j_digits
-                return i < j
+            i_digits: str = "".join(itertools.takewhile(str.isdigit, i))
+            j_digits: str = "".join(itertools.takewhile(str.isdigit, j))
+            if i_digits != j_digits:
+                if i_digits and j_digits:
+                    return int(i_digits) < int(j_digits)
+                return i_digits < j_digits
+            return i < j
         return False
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, (str, ReleaseInfo)):
             raise TypeError("The argument must be a string or ReleaseInfo")
         if isinstance(other, str):
@@ -363,7 +360,7 @@ if sys.version_info < (3, 10, 0):
 
     # noinspection PyShadowingBuiltins,PyUnusedLocal
     def zip(*iterables: Iterable[Any], strict: bool = False) -> builtins.zip:
-        """Intentionally override `builtins.zip` to ignore `strict` parameter in Python < 3.10"""
+        """Intentionally override `builtins.zip` to ignore `strict` parameter in Python < 3.10."""
         return builtins.zip(*iterables)
 
     __all__.append("zip")

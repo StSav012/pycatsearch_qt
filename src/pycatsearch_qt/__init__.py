@@ -1,10 +1,10 @@
 import sys
 from abc import ABCMeta
+from collections.abc import Callable
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from functools import partialmethod
 from pathlib import Path
-from typing import Any
 
 from packaging.version import Version
 from pycatsearch.catalog import Catalog
@@ -114,9 +114,9 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
 
     if py38_modules:
         for m in list(sys.modules):
-            if m.startswith(__original_name__):
-                if m in sys.modules:  # check again in case the module's gone midway
-                    sys.modules.pop(m)
+            if m.startswith(__original_name__) and m in sys.modules:
+                # check again in case the module's gone midway
+                sys.modules.pop(m)
 
         sys.meta_path.insert(0, StringImporter(**{__original_name__: py38_modules}))
         if __original_name__ not in sys.modules:
@@ -124,7 +124,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
 
 
 def _warn_about_outdated_package(package_name: str, package_version: str, release_time: datetime) -> None:
-    """Display a warning about an outdated package a year after the package released"""
+    """Warn about an outdated package a year after the package released."""
     if datetime.now(tz=timezone.utc) - release_time > timedelta(days=366):
         import tkinter.messagebox
 
@@ -223,7 +223,7 @@ def _make_old_qt_compatible_again() -> None:
             from qtpy.QtGui import QKeySequence
             from qtpy.QtWidgets import QAction, QToolBar, QWidget
 
-            def add_action(self: QWidget, *args, old_add_action) -> QAction:
+            def add_action(self: QWidget, *args: object, old_add_action: Callable[..., QAction]) -> QAction:
                 action: QAction
                 icon: QIcon
                 text: str
@@ -248,7 +248,7 @@ def _make_old_qt_compatible_again() -> None:
                     else:
                         return old_add_action(self, *args)
                     return action
-                elif all(
+                if all(
                     isinstance(arg, t)
                     for arg, t in zip(
                         args, [QIcon, str, (QKeySequence, QKeySequence.StandardKey, str, int), QObject, bytes]
@@ -293,7 +293,7 @@ def _make_old_qt_compatible_again() -> None:
             QMenu.exec = lambda self, pos: self.exec_(pos)
 
 
-def qta_icon(*qta_name: str, **qta_specs: Any) -> QIcon:
+def qta_icon(*qta_name: str, **qta_specs: object) -> QIcon:
     if qta_name:
         with suppress(ImportError, Exception):
             from qtawesome import icon

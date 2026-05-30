@@ -15,6 +15,7 @@ except (SyntaxError, ImportError, ModuleNotFoundError):
 __all__ = ["ProgressPage"]
 
 
+# noinspection PyPep8Naming
 class ProgressPage(QWizardPage):
     def __init__(self, parent: QWidget | None = None, existing_catalog: Catalog | None = None) -> None:
         super().__init__(parent)
@@ -41,7 +42,7 @@ class ProgressPage(QWizardPage):
         self._timer.timeout.connect(self._on_timeout)
 
     def initializePage(self) -> None:
-        super(ProgressPage, self).initializePage()
+        super().initializePage()
         self.setButtonText(QWizard.WizardButton.CommitButton, self.buttonText(QWizard.WizardButton.NextButton))
 
         frequency_limits: tuple[float, float] = (

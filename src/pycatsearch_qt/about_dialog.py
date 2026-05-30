@@ -3,10 +3,8 @@ import sys
 from functools import partial
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import cast
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QTextDocument
 from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -46,8 +44,8 @@ class AboutBox(QDialog):
 
         about_text: QTextBrowser = QTextBrowser(self)
         about_text.setText(text)
-        cast(QTextDocument, about_text.document()).adjustSize()
-        about_text.setMinimumSize(cast(QTextDocument, about_text.document()).size().toSize())
+        about_text.document().adjustSize()
+        about_text.setMinimumSize(about_text.document().size().toSize())
 
         tabs: QTabWidget = QTabWidget(self)
         tabs.setTabBarAutoHide(True)

@@ -16,7 +16,7 @@ class DownloadConfirmationPage(QWizardPage):
         layout.addWidget(self._label)
 
     def initializePage(self) -> None:
-        super(DownloadConfirmationPage, self).initializePage()
+        super().initializePage()
         self.setButtonText(QWizard.WizardButton.CommitButton, self.tr("&Start"))
         self._label.setText(
             self.tr(

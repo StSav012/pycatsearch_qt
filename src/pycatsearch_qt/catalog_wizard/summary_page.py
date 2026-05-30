@@ -16,7 +16,7 @@ class SummaryPage(QWizardPage):
     def initializePage(self) -> None:
         from . import SaveCatalogWizard
 
-        super(SummaryPage, self).initializePage()
+        super().initializePage()
         if cast(SaveCatalogWizard, self.wizard()).catalog:
             self.setTitle(self.tr("Success"))
             self.setButtonText(QWizard.WizardButton.FinishButton, self.tr("&Save"))

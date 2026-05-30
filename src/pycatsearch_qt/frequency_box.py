@@ -10,7 +10,7 @@ __all__ = ["FrequencyBox"]
 
 
 class FrequencySpinBox(QDoubleSpinBox):
-    """`QDoubleSpinBox` with altered defaults"""
+    """`QDoubleSpinBox` with altered defaults."""
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -88,15 +88,13 @@ class FrequencyBox(QTabWidget):
     def min_frequency(self) -> float:
         if self.currentWidget() is self._page_by_range:
             return self._frequency_from
-        else:
-            return self._frequency_center - self._frequency_deviation
+        return self._frequency_center - self._frequency_deviation
 
     @property
     def max_frequency(self) -> float:
         if self.currentWidget() is self._page_by_range:
             return self._frequency_to
-        else:
-            return self._frequency_center + self._frequency_deviation
+        return self._frequency_center + self._frequency_deviation
 
     def set_frequency_limits(self, min_value: float, max_value: float) -> None:
         frequency_spins: list[QDoubleSpinBox] = [

@@ -45,14 +45,12 @@ class FloatSpinBox(QDoubleSpinBox):
         if self._mode == FloatSpinBox.Mode.auto:
             if abs(v) < self.singleStep() and v != 0.0:
                 return f"{v:.{self._decimals}e}".replace(".", decimal_point)
-            else:
-                return f"{v:.{self._decimals}f}".replace(".", decimal_point)
-        elif self._mode == FloatSpinBox.Mode.fixed:
             return f"{v:.{self._decimals}f}".replace(".", decimal_point)
-        elif self._mode == FloatSpinBox.Mode.scientific:
+        if self._mode == FloatSpinBox.Mode.fixed:
+            return f"{v:.{self._decimals}f}".replace(".", decimal_point)
+        if self._mode == FloatSpinBox.Mode.scientific:
             return f"{v:.{self._decimals}e}".replace(".", decimal_point)
-        else:
-            raise RuntimeError(f"Unknown mode {self._mode}")
+        raise RuntimeError(f"Unknown mode {self._mode}")
 
     def validate(self, text: str, pos: int) -> tuple[QValidator.State, str, int]:
         try:

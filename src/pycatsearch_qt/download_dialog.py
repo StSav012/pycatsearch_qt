@@ -13,7 +13,7 @@ __all__ = ["DownloadDialog"]
 
 
 class DownloadDialog(SaveCatalogWizard):
-    """GUI for `async_downloader.Downloader` or `downloader.Downloader`"""
+    """GUI for `async_downloader.Downloader` or `downloader.Downloader`."""
 
     def __init__(
         self,

@@ -2,7 +2,7 @@ import os
 import sys
 from math import inf
 from pathlib import PurePath
-from typing import Any, final
+from typing import final
 
 from pycatsearch.catalog import Catalog
 from pycatsearch.utils import CatalogType
@@ -311,7 +311,7 @@ class UI(QMainWindow):
                 "\n".join(
                     (
                         p_tag(self.tr("Loading catalogs:")),
-                        tag("ul", "\n".join((tag("li", str(fn)) for fn in catalog_file_names))),
+                        tag("ul", "\n".join(tag("li", str(fn)) for fn in catalog_file_names)),
                     )
                 ),
             )
@@ -411,8 +411,8 @@ class UI(QMainWindow):
                 return
 
     def stringify_selection_html(self) -> str:
-        """
-        Convert selected rows to string for copying as rich text
+        """Convert selected rows to string for copying as rich text.
+
         :return: the rich text representation of the selected table lines
         """
         if not self.results_table.selectionModel().hasSelection():
@@ -428,11 +428,11 @@ class UI(QMainWindow):
         csv_separator: str = self.settings.csv_separator
         actions_checked: list[bool] = [_a.isChecked() for _a in self.menu_bar.menu_columns.actions()]
 
-        def format_value(value: Any, unit: str) -> str:
+        def format_value(value: object, unit: str) -> str:
             return (
-                self.tr("{value} {unit}", "format value in html").format(value=value, unit=unit)
+                self.tr("{value} {unit}", "format value in HTML").format(value=value, unit=unit)
                 if with_units and unit
-                else self.tr("{value}", "format value in html").format(value=value)
+                else self.tr("{value}", "format value in HTML").format(value=value)
             )
 
         columns_order: list[int] = [

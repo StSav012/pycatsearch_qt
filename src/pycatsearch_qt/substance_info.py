@@ -1,5 +1,6 @@
+from collections.abc import Collection
 from contextlib import suppress
-from typing import TYPE_CHECKING, Any, Collection
+from typing import TYPE_CHECKING
 
 from pycatsearch.utils import (
     HUMAN_READABLE,
@@ -93,7 +94,7 @@ class SubstanceInfoSelector(QDialog):
         theme_name: str,
         *qta_name: str,
         standard_pixmap: QStyle.StandardPixmap | None = None,
-        **qta_specs: Any,
+        **qta_specs: object,
     ) -> QIcon:
         if theme_name and QIcon.hasThemeIcon(theme_name):
             return QIcon.fromTheme(theme_name)
@@ -126,7 +127,7 @@ class SubstanceInfoSelector(QDialog):
 
 
 class SubstanceInfo(QDialog):
-    """A simple dialog that displays the information about a substance from the loaded catalog"""
+    """Display the information about a substance from the loaded catalog."""
 
     def __init__(
         self,
@@ -146,7 +147,7 @@ class SubstanceInfo(QDialog):
         for key in entry.__slots__:
             if key == LINES:
                 continue
-            elif key == ID:
+            if key == ID:
                 label = URLLabel(
                     url=f"https://cdms.astro.uni-koeln.de/cdms/portal/catalog/{getattr(entry, key)}/",
                     text=f"{getattr(entry, key)}",

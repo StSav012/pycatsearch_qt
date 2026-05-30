@@ -13,11 +13,7 @@ class HTMLDelegate(QStyledItemDelegate):
         index: QModelIndex | QPersistentModelIndex,
     ) -> None:
         self.initStyleOption(option, index)
-        style: QStyle | None
-        if option.widget:
-            style = option.widget.style()
-        else:
-            style = QApplication.style()
+        style: QStyle | None = option.widget.style() if option.widget else QApplication.style()
         if style is None:
             raise RuntimeError("Failed to get style")
         doc: QTextDocument = QTextDocument()

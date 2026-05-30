@@ -60,12 +60,12 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                         ),
                     )
                 else:
-                    return super(SaveCatalogWizard, self).done(exit_code)
+                    return super().done(exit_code)
 
             save_filename: Path | None
             while True:
                 if not (save_filename := self.save_dialog.get_save_filename()):
-                    return super(SaveCatalogWizard, self).done(QDialog.DialogCode.Rejected)
+                    return super().done(QDialog.DialogCode.Rejected)
 
                 try:
                     ws = SaveCatalogWaitingScreen(
@@ -84,6 +84,6 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                         ).format(exception=ex, filename=save_filename),
                     )
                 else:
-                    return super(SaveCatalogWizard, self).done(exit_code)
+                    return super().done(exit_code)
 
-        return super(SaveCatalogWizard, self).done(exit_code)
+        return super().done(exit_code)

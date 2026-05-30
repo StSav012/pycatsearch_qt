@@ -1,5 +1,6 @@
+from collections.abc import Mapping, Sequence
 from threading import Thread
-from typing import Any, Callable, Generic, Mapping, Sequence, TypeVar
+from typing import Any, Callable, Generic, TypeVar
 
 from qtpy.QtCore import QCoreApplication, QEventLoop, QMargins, QSize, Qt
 from qtpy.QtGui import QKeySequence

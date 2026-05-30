@@ -1,9 +1,10 @@
 import mimetypes
 import re
+from collections.abc import Collection, Sequence
 from importlib.util import find_spec
 from os import PathLike
 from pathlib import PurePath
-from typing import Collection, NamedTuple, Sequence, cast
+from typing import NamedTuple, cast
 
 from qtpy.QtCore import QObject, Slot
 from qtpy.QtWidgets import QComboBox, QFileDialog, QWidget
@@ -158,11 +159,11 @@ class OpenFileDialog(FileDialog):
         supported_mimetypes: list[str] = []
         mimetype: str | None
         for supported_mimetype_filter in self.supported_mimetype_filters:
-            if not supported_mimetype_filter.required_packages or any(
-                find_spec(package) for package in supported_mimetype_filter.required_packages
-            ):
-                if mimetype := mimetypes.types_map.get(supported_mimetype_filter.file_extension):
-                    supported_mimetypes.append(mimetype)
+            if (
+                not supported_mimetype_filter.required_packages
+                or any(find_spec(package) for package in supported_mimetype_filter.required_packages)
+            ) and (mimetype := mimetypes.types_map.get(supported_mimetype_filter.file_extension)):
+                supported_mimetypes.append(mimetype)
         # for the “All files (*)” filter
         supported_mimetypes.append("application/octet-stream")
 
@@ -274,20 +275,20 @@ class SaveFileDialog(FileDialog):
         supported_mimetypes: list[str] = []
         mimetype: str | None
         for supported_mimetype_filter in self.supported_mimetype_filters:
-            if not supported_mimetype_filter.required_packages or any(
-                find_spec(package) for package in supported_mimetype_filter.required_packages
-            ):
-                if mimetype := mimetypes.types_map.get(supported_mimetype_filter.file_extension):
-                    supported_mimetypes.append(mimetype)
-                    all_extensions.add(supported_mimetype_filter.file_extension)
-                    if filename_mimetype is not None and filename_mimetype == mimetype:
-                        selected_mimetype = mimetype
-                        if (
-                            selected_mimetype is not None
-                            and not selected_ext
-                            and (ext := mimetypes.guess_extension(selected_mimetype, strict=False))
-                        ):
-                            selected_ext = ext
+            if (
+                not supported_mimetype_filter.required_packages
+                or any(find_spec(package) for package in supported_mimetype_filter.required_packages)
+            ) and (mimetype := mimetypes.types_map.get(supported_mimetype_filter.file_extension)):
+                supported_mimetypes.append(mimetype)
+                all_extensions.add(supported_mimetype_filter.file_extension)
+                if filename_mimetype is not None and filename_mimetype == mimetype:
+                    selected_mimetype = mimetype
+                    if (
+                        selected_mimetype is not None
+                        and not selected_ext
+                        and (ext := mimetypes.guess_extension(selected_mimetype, strict=False))
+                    ):
+                        selected_ext = ext
 
         if not supported_name_filters and not supported_mimetypes:
             return None

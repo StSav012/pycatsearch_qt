@@ -1,10 +1,11 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from qtpy.QtWidgets import QAbstractScrollArea, QLabel, QListWidget, QVBoxLayout, QWidget
 
 __all__ = ["TitledListWidget"]
 
 
+# noinspection PyPep8Naming
 class TitledListWidget(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)

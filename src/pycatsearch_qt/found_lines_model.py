@@ -1,5 +1,5 @@
 import enum
-from typing import Any, Callable, Final
+from typing import Callable, Final
 
 from pycatsearch.utils import CatalogType
 from qtpy.QtCore import QAbstractTableModel, QLocale, QModelIndex, QPersistentModelIndex, Qt
@@ -79,7 +79,7 @@ class FoundLinesModel(QAbstractTableModel):
                     self._lower_state_energy_str = f"{self.lower_state_energy:.4f}".replace(".", self.decimal_point)
             return self._lower_state_energy_str
 
-        def __eq__(self, other: Any) -> bool:
+        def __eq__(self, other: object) -> bool:
             if not isinstance(other, FoundLinesModel.DataType):
                 raise NotImplementedError(f"Comparison with {type(other)} is not supported")
             return (
@@ -127,25 +127,24 @@ class FoundLinesModel(QAbstractTableModel):
             unit=self._settings.energy_unit_str,
         )
 
-    def rowCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
+    def rowCount(self, parent: QModelIndex | QPersistentModelIndex | None = None) -> int:
         return min(len(self._data), self._rows_loaded)
 
-    def columnCount(self, parent: QModelIndex | QPersistentModelIndex = QModelIndex()) -> int:
+    def columnCount(self, parent: QModelIndex | QPersistentModelIndex | None = None) -> int:
         return len(self._header)
 
     def data(self, index: QModelIndex | QPersistentModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> str | None:
-        if index.isValid():
-            if role == Qt.ItemDataRole.DisplayRole:
-                item: FoundLinesModel.DataType = self._data[index.row()]
-                column_index: int = index.column()
-                if column_index == FoundLinesModel.Columns.SubstanceName:
-                    return item.name
-                if column_index == FoundLinesModel.Columns.Frequency:
-                    return item.frequency_str
-                if column_index == FoundLinesModel.Columns.Intensity:
-                    return item.intensity_str
-                if column_index == FoundLinesModel.Columns.LowerStateEnergy:
-                    return item.lower_state_energy_str
+        if index.isValid() and role == Qt.ItemDataRole.DisplayRole:
+            item: FoundLinesModel.DataType = self._data[index.row()]
+            column_index: int = index.column()
+            if column_index == FoundLinesModel.Columns.SubstanceName:
+                return item.name
+            if column_index == FoundLinesModel.Columns.Frequency:
+                return item.frequency_str
+            if column_index == FoundLinesModel.Columns.Intensity:
+                return item.intensity_str
+            if column_index == FoundLinesModel.Columns.LowerStateEnergy:
+                return item.lower_state_energy_str
         return None
 
     def row(self, row_index: int) -> DataType:
@@ -228,10 +227,10 @@ class FoundLinesModel(QAbstractTableModel):
         self._data.sort(key=key, reverse=bool(order != Qt.SortOrder.AscendingOrder))
         self.endResetModel()
 
-    def canFetchMore(self, index: QModelIndex | QPersistentModelIndex = QModelIndex()) -> bool:
+    def canFetchMore(self, index: QModelIndex | QPersistentModelIndex) -> bool:
         return len(self._data) > self._rows_loaded
 
-    def fetchMore(self, index: QModelIndex | QPersistentModelIndex = QModelIndex()) -> None:
+    def fetchMore(self, index: QModelIndex | QPersistentModelIndex) -> None:
         # https://sateeshkumarb.wordpress.com/2012/04/01/paginated-display-of-table-data-in-pyqt/
         remainder: int = len(self._data) - self._rows_loaded
         if remainder <= 0:

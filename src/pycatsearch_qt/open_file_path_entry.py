@@ -60,7 +60,6 @@ class OpenFilePathEntry(QWidget):
     def _on_browse_button_clicked(self) -> None:
         if self._dialog.exec() == QFileDialog.DialogCode.Accepted:
             selected_files: list[str] = self._dialog.selectedFiles()
-            if selected_files:
-                if Path(selected_files[0]) != self._path:
-                    self.path = Path(selected_files[0])
-                    self.changed.emit(self._path)
+            if selected_files and Path(selected_files[0]) != self._path:
+                self.path = Path(selected_files[0])
+                self.changed.emit(self._path)

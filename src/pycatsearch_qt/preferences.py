@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+from collections.abc import Hashable
 from functools import partial
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, ClassVar, Hashable, cast
+from typing import Any, ClassVar, cast
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -45,7 +46,7 @@ class BaseLogger(ABC):
 
 
 class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
-    """A page of the Preferences dialog"""
+    """A page of the Preferences dialog."""
 
     def __init__(
         self,
@@ -142,7 +143,7 @@ class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
                     combobox_data = value2.combobox_data
                 else:
                     combobox_data = dict(enumerate(value2.combobox_data))
-                for index, (data, item) in enumerate(combobox_data.items()):
+                for data, item in combobox_data.items():
                     combo_box.addItem(settings.tr(item), data)
                 combo_box.setEditable(False)
                 combo_box.setCurrentText(combobox_data[current_value])
@@ -179,7 +180,7 @@ class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
 
 
 class PreferencesBody(BaseLogger, QSplitter, metaclass=_QWidgetMetaMixin):
-    """The main area of the GUI preferences dialog"""
+    """The main area of the GUI preferences dialog."""
 
     def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         from . import qta_icon  # import locally to avoid a circular import
@@ -242,7 +243,7 @@ class PreferencesBody(BaseLogger, QSplitter, metaclass=_QWidgetMetaMixin):
 
 
 class Preferences(QDialog):
-    """GUI preferences dialog"""
+    """GUI preferences dialog."""
 
     def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         super().__init__(parent)

@@ -1,7 +1,8 @@
+from collections.abc import Hashable, Iterable, Iterator, Sequence
 from contextlib import contextmanager, suppress
 from os import PathLike, linesep
 from pathlib import Path
-from typing import Any, Callable, Final, Hashable, Iterable, Iterator, NamedTuple, Sequence
+from typing import Callable, Final, NamedTuple
 
 from pycatsearch.utils import (
     cm_per_molecule_to_log10_sq_nm_mhz,
@@ -27,7 +28,7 @@ __all__ = ["Settings"]
 
 
 class Settings(QSettings):
-    """convenient internal representation of the application settings"""
+    """Convenient internal representation of the application settings."""
 
     class CallbackOnly(NamedTuple):
         callback: str

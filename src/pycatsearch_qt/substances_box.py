@@ -1,6 +1,6 @@
 import re
 from contextlib import suppress
-from typing import Any, Callable
+from typing import Callable
 
 from pycatsearch.utils import (
     ISOTOPOLOG,
@@ -109,7 +109,7 @@ class SubstanceBox(QGroupBox):
         theme_name: str,
         *qta_name: str,
         standard_pixmap: QStyle.StandardPixmap | None = None,
-        **qta_specs: Any,
+        **qta_specs: object,
     ) -> QIcon:
         if theme_name and QIcon.hasThemeIcon(theme_name):
             return QIcon.fromTheme(theme_name)

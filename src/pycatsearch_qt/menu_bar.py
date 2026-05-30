@@ -1,5 +1,4 @@
 from contextlib import suppress
-from typing import Any
 
 from qtpy.QtGui import QIcon, QKeySequence
 from qtpy.QtWidgets import QAction, QMenu, QMenuBar, QStyle, QWidget
@@ -116,7 +115,11 @@ class MenuBar(QMenuBar):
         self.action_show_lower_state_energy.setCheckable(True)
 
     def _icon(
-        self, theme_name: str, *qta_name: str, standard_pixmap: QStyle.StandardPixmap | None = None, **qta_specs: Any
+        self,
+        theme_name: str,
+        *qta_name: str,
+        standard_pixmap: QStyle.StandardPixmap | None = None,
+        **qta_specs: object,
     ) -> QIcon:
         if theme_name and QIcon.hasThemeIcon(theme_name):
             return QIcon.fromTheme(theme_name)

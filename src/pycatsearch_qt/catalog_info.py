@@ -1,7 +1,8 @@
 import enum
+from collections.abc import Iterable
 from datetime import timedelta
 from pathlib import Path
-from typing import Iterable, cast
+from typing import cast
 
 from pycatsearch.catalog import Catalog, CatalogSourceInfo
 from qtpy.QtCore import QDateTime, QLocale, QModelIndex, QTimeZone, QUrl, Qt, Signal, Slot
@@ -143,7 +144,7 @@ class SourcesList(QTableWidget):
 
 
 class CatalogInfo(QDialog):
-    """A simple dialog that displays the information about the loaded catalog(s)"""
+    """Display the information about the loaded catalog(s)."""
 
     catalogUpdated: Signal = Signal(name="catalogUpdated")
 
