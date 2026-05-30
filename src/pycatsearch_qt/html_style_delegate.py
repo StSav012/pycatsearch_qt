@@ -16,7 +16,7 @@ class HTMLDelegate(QStyledItemDelegate):
         style: QStyle | None = option.widget.style() if option.widget else QApplication.style()
         if style is None:
             raise RuntimeError("Failed to get style")
-        doc: QTextDocument = QTextDocument()
+        doc: QTextDocument = QTextDocument(self)
         doc.setHtml(option.text)
         option.text = ""
         style.drawControl(QStyle.ControlElement.CE_ItemViewItem, option, painter)
@@ -34,7 +34,7 @@ class HTMLDelegate(QStyledItemDelegate):
     def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex | QPersistentModelIndex) -> QSize:
         options: QStyleOptionViewItem = QStyleOptionViewItem(option)
         self.initStyleOption(options, index)
-        doc: QTextDocument = QTextDocument()
+        doc: QTextDocument = QTextDocument(self)
         doc.setHtml(options.text)
         doc.setTextWidth(options.rect.width())
         return QSize(round(doc.idealWidth()), round(QTextDocument().size().height()))
