@@ -1,5 +1,5 @@
 import abc
-from pathlib import Path
+from pathlib import PurePath
 
 from pycatsearch.utils import CatalogType
 from qtpy.QtWidgets import QDialog, QMessageBox, QWidget, QWizard
@@ -21,13 +21,13 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
     def __init__(
         self,
         settings: Settings,
-        default_save_location: Path | None = None,
+        default_save_location: PurePath | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
 
         self.catalog: CatalogType = dict()
-        self.default_save_location: Path | None = default_save_location
+        self.default_save_location: PurePath | None = default_save_location
 
         self.save_dialog: CatalogSaveFileDialog = CatalogSaveFileDialog(settings=settings, parent=self)
 
@@ -62,7 +62,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                 else:
                     return super().done(exit_code)
 
-            save_filename: Path | None
+            save_filename: PurePath | None
             while True:
                 if not (save_filename := self.save_dialog.get_save_filename()):
                     return super().done(QDialog.DialogCode.Rejected)
