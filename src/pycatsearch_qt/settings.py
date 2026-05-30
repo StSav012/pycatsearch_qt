@@ -386,7 +386,8 @@ class Settings(QSettings):
     @catalog_file_names.setter
     def catalog_file_names(self, filenames: Iterable[str | PathLike[str]]) -> None:
         with self.section("search"):
-            self.beginWriteArray("catalogFiles")
+            filenames = list(filenames)
+            self.beginWriteArray("catalogFiles", len(filenames))
             for i, s in enumerate(filenames):
                 self.setArrayIndex(i)
                 self.setValue("path", str(s))
