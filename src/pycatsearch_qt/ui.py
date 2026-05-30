@@ -48,6 +48,7 @@ from .utils import (
     p_tag,
     remove_html,
     tag,
+    the,
     update_with_pip,
     wrap_in_html,
 )
@@ -143,27 +144,30 @@ class UI(QMainWindow):
             layout_right: QVBoxLayout = QVBoxLayout()
             layout_options: QFormLayout = QFormLayout()
 
-            self.results_table.setModel(self.results_model)
-            self.results_table.setItemDelegateForColumn(0, HTMLDelegate(self.results_table))
-            self.results_table.setMouseTracking(True)
-            self.results_table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            self.results_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-            self.results_table.setDropIndicatorShown(False)
-            self.results_table.setDragDropOverwriteMode(False)
-            self.results_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-            self.results_table.setCornerButtonEnabled(False)
-            self.results_table.setSortingEnabled(True)
-            self.results_table.setAlternatingRowColors(True)
-            self.results_table.horizontalHeader().setObjectName("resultsTableHorizontalHeader")
-            self.results_table.horizontalHeader().setDefaultSectionSize(180)
-            self.results_table.horizontalHeader().setHighlightSections(False)
-            self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-            self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-            self.results_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-            self.results_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-            self.results_table.horizontalHeader().setSectionsMovable(True)
-            self.results_table.verticalHeader().setVisible(False)
-            self.results_table.verticalHeader().setHighlightSections(False)
+            with the(self.results_table) as table:
+                table.setModel(self.results_model)
+                table.setItemDelegateForColumn(0, HTMLDelegate(self.results_table))
+                table.setMouseTracking(True)
+                table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+                table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+                table.setDropIndicatorShown(False)
+                table.setDragDropOverwriteMode(False)
+                table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+                table.setCornerButtonEnabled(False)
+                table.setSortingEnabled(True)
+                table.setAlternatingRowColors(True)
+                with the(table.horizontalHeader()) as header:
+                    header.setObjectName("resultsTableHorizontalHeader")
+                    header.setDefaultSectionSize(180)
+                    header.setHighlightSections(False)
+                    header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+                    header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+                    header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+                    header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+                    header.setSectionsMovable(True)
+                with the(table.verticalHeader()) as header:
+                    header.setVisible(False)
+                    header.setHighlightSections(False)
 
             # substance selection
             self._top_matter.addWidget(self.box_substance)
@@ -171,31 +175,31 @@ class UI(QMainWindow):
             # frequency limits
             layout_right.addWidget(self.box_frequency, 1)
 
-            self.spin_intensity.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter
-            )
-            self.spin_intensity.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
-            self.spin_intensity.setDecimals(2)
-            self.spin_intensity.setRange(-inf, inf)
-            self.spin_intensity.setSingleStep(0.1)
-            self.spin_intensity.setValue(-6.54)
-            self.spin_intensity.setSizePolicy(
-                QSizePolicy.Policy.Expanding, self.spin_intensity.sizePolicy().verticalPolicy()
-            )
-            self.spin_intensity.setStatusTip(self.tr("Limit shown spectral lines"))
-            layout_options.addRow(self.tr("Minimal Intensity:"), self.spin_intensity)
-            self.spin_temperature.setAlignment(
-                Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter
-            )
-            self.spin_temperature.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
-            self.spin_temperature.setMaximum(999.99)
-            self.spin_temperature.setValue(300.0)
-            self.spin_temperature.setSizePolicy(
-                QSizePolicy.Policy.Expanding, self.spin_temperature.sizePolicy().verticalPolicy()
-            )
-            self.spin_temperature.setStatusTip(self.tr("Temperature to calculate intensity"))
-            self.spin_temperature.setSuffix(self.tr(" K"))
-            layout_options.addRow(self.tr("Temperature:"), self.spin_temperature)
+            with the(self.spin_intensity) as spin:
+                spin.setAlignment(
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter
+                )
+                spin.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+                spin.setDecimals(2)
+                spin.setRange(-inf, inf)
+                spin.setSingleStep(0.1)
+                spin.setValue(-6.54)
+                spin.setSizePolicy(QSizePolicy.Policy.Expanding, spin.sizePolicy().verticalPolicy())
+                spin.setStatusTip(self.tr("Limit shown spectral lines"))
+                layout_options.addRow(self.tr("Minimal Intensity:"), spin)
+
+            with the(self.spin_temperature) as spin:
+                spin.setAlignment(
+                    Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTrailing | Qt.AlignmentFlag.AlignVCenter
+                )
+                spin.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
+                spin.setMaximum(999.99)
+                spin.setValue(300.0)
+                spin.setSizePolicy(QSizePolicy.Policy.Expanding, spin.sizePolicy().verticalPolicy())
+                spin.setStatusTip(self.tr("Temperature to calculate intensity"))
+                spin.setSuffix(self.tr(" K"))
+                layout_options.addRow(self.tr("Temperature:"), spin)
+
             layout_right.addLayout(layout_options, 0)
 
             self.button_search.setText(self.tr("Show"))

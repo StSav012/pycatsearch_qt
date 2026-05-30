@@ -5,7 +5,7 @@ import os
 import sys
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
-from typing import Any
+from typing import Any, TypeVar
 
 from pycatsearch.utils import NAME, STOICHIOMETRIC_FORMULA, STRUCTURAL_FORMULA, CatalogEntryType
 
@@ -20,6 +20,7 @@ __all__ = [
     "tag",
     "p_tag",
     "a_tag",
+    "the",
 ]
 
 
@@ -364,3 +365,11 @@ if sys.version_info < (3, 10, 0):
         return builtins.zip(*iterables)
 
     __all__.append("zip")
+
+
+_T = TypeVar("_T")
+
+
+@contextmanager
+def the(obj: _T) -> Iterator[_T]:
+    yield obj
