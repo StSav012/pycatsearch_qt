@@ -2,7 +2,7 @@ from collections.abc import Hashable, Iterable, Iterator, Sequence
 from contextlib import contextmanager, suppress
 from os import PathLike, linesep
 from pathlib import Path
-from typing import Callable, Final, NamedTuple
+from typing import TYPE_CHECKING, Callable, Final, NamedTuple
 
 from pycatsearch.utils import (
     cm_per_molecule_to_log10_sq_nm_mhz,
@@ -164,6 +164,14 @@ class Settings(QSettings):
                 ),
             },
         }
+
+    if TYPE_CHECKING:
+        from typing import TypeVar, override
+
+        _T = TypeVar("_T")
+
+        @override
+        def value(self, key: str, default_value: _T | None = None, value_type: type[_T] | None = None) -> _T: ...
 
     @contextmanager
     def section(self, section: str) -> Iterator[None]:
