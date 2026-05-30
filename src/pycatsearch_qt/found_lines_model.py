@@ -205,7 +205,7 @@ class FoundLinesModel(QAbstractTableModel):
                 for line in entries[species_tag].lines
             )
         )
-        self._rows_loaded = 0
+        self._rows_loaded = FoundLinesModel.ROW_BATCH_COUNT
         self.endResetModel()
 
     def sort(self, column: int, order: Qt.SortOrder = Qt.SortOrder.AscendingOrder) -> None:
