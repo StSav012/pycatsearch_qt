@@ -47,19 +47,19 @@ class FoundLinesModel(QAbstractTableModel):
             self.intensity: float = intensity
             self.lower_state_energy: float = lower_state_energy
 
-            self._frequency_str: str | None = None
-            self._intensity_str: str | None = None
-            self._lower_state_energy_str: str | None = None
+            self._frequency_str: str = ""
+            self._intensity_str: str = ""
+            self._lower_state_energy_str: str = ""
 
         @property
         def frequency_str(self) -> str:
-            if self._frequency_str is None:
+            if not self._frequency_str:
                 self._frequency_str = f"{self.frequency:.{self.precision}f}".replace(".", self.decimal_point)
             return self._frequency_str
 
         @property
         def intensity_str(self) -> str:
-            if self._intensity_str is None:
+            if not self._intensity_str:
                 if self.intensity == 0.0:
                     self._intensity_str = "0"
                 elif abs(self.intensity) < 0.1:
@@ -70,7 +70,7 @@ class FoundLinesModel(QAbstractTableModel):
 
         @property
         def lower_state_energy_str(self) -> str:
-            if self._lower_state_energy_str is None:
+            if not self._lower_state_energy_str:
                 if self.lower_state_energy == 0.0:
                     self._lower_state_energy_str = "0"
                 elif abs(self.lower_state_energy) < 0.1:
