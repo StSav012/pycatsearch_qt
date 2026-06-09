@@ -65,12 +65,6 @@
         <translation>Информация о веществе</translation>
     </message>
     <message>
-        <location filename="../substance_info.py" line="167"/>
-        <source></source>
-        <comment>HUMAN_READABLE[key]</comment>
-        <translation></translation>
-    </message>
-    <message>
         <location filename="../substance_info.py" line="169"/>
         <source>Number of spectral lines</source>
         <translation>Число спектральных линий</translation>
