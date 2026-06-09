@@ -138,11 +138,8 @@ class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
                     PreferencePage.logger.error(f"The type of {value2.callback!r} is not supported")
                     continue
                 combo_box = QComboBox(widget)
-                combobox_data: dict[Hashable, str]
-                if isinstance(value2.combobox_data, dict):
-                    combobox_data = value2.combobox_data
-                else:
-                    combobox_data = dict(enumerate(value2.combobox_data))
+                cd: Iterable[str] | dict[Hashable, str] = value2.combobox_data
+                combobox_data: dict[Hashable, str] = cd if isinstance(cd, dict) else dict(enumerate(cd))
                 for data, item in combobox_data.items():
                     combo_box.addItem(settings.tr(item), data)
                 combo_box.setEditable(False)

@@ -1,6 +1,6 @@
 import sys
 from abc import ABCMeta
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from functools import partialmethod
@@ -70,7 +70,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
         def find_spec(
             self,
             fullname: str,
-            path: "str | None",
+            path: "Sequence[str] | None",
             target: "ModuleType | None" = None,
         ) -> "ModuleSpec | None":
             if fullname in self._modules:

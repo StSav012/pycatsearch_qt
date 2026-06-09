@@ -1,6 +1,6 @@
 import enum
 from collections.abc import Iterable
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import cast
 
@@ -129,9 +129,10 @@ class SourcesList(QTableWidget):
             item.setToolTip(str(info_item.filename))
             item.setData(Qt.ItemDataRole.UserRole, info_item.filename)
             self.setItem(row, SourcesList.Columns.FileLocation, item)
-            if info_item.build_datetime is not None:
-                qt_datetime: QDateTime = QDateTime(info_item.build_datetime)
-                utcoffset: timedelta | None = info_item.build_datetime.utcoffset()
+            build_datetime: datetime | None = info_item.build_datetime
+            if build_datetime is not None:
+                qt_datetime: QDateTime = QDateTime(build_datetime)
+                utcoffset: timedelta | None = build_datetime.utcoffset()
                 if utcoffset is not None:
                     qt_datetime.setTimeZone(QTimeZone(round(utcoffset.total_seconds())))
                 item = QTableWidgetItem(qt_datetime.toLocalTime().toString())

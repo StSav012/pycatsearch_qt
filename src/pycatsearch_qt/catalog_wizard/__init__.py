@@ -38,7 +38,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
     @abc.abstractmethod
     def frequency_limits(self) -> tuple[float, float]: ...
 
-    def done(self, exit_code: QDialog.DialogCode) -> None:
+    def done(self, exit_code: QDialog.DialogCode | int) -> None:
         ws: WaitingScreen[bool]
         if exit_code == QDialog.DialogCode.Accepted and self.catalog:
             if self.default_save_location is not None:

@@ -52,7 +52,7 @@ class DownloadDialog(SaveCatalogWizard):
     def frequency_limits(self) -> tuple[float, float]:
         return self._settings_page.frequency_limits
 
-    def done(self, exit_code: QDialog.DialogCode) -> None:
+    def done(self, exit_code: QDialog.DialogCode | int) -> None:
         if self._progress_page.isActive():
             self._progress_page.stop()
         return super().done(exit_code)

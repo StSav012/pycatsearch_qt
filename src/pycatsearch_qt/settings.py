@@ -372,7 +372,7 @@ class Settings(QSettings):
             self.setValue("InChIKeySearchURLTemplate", new_value)
 
     @property
-    def catalog_file_names(self) -> list[str | PathLike[str]]:
+    def catalog_file_names(self) -> list[str]:
         catalog_file_names: list[str] = []
         with self.section("search"):
             for i in range(self.beginReadArray("catalogFiles")):

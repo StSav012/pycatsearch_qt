@@ -67,7 +67,7 @@ class UpdateDialog(SaveCatalogWizard):
             return nan, nan
         return self._old_catalog.min_frequency, self._old_catalog.max_frequency
 
-    def done(self, exit_code: QDialog.DialogCode) -> None:
+    def done(self, exit_code: QDialog.DialogCode | int) -> None:
         if self._progress_page.isActive():
             self._progress_page.stop()
         return super().done(exit_code)
