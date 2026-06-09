@@ -2,7 +2,9 @@ import html
 import html.entities
 import itertools
 import os
+import re
 import sys
+import unicodedata
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from typing import Any, TypeVar
@@ -14,6 +16,7 @@ __all__ = [
     "best_name",
     "remove_html",
     "wrap_in_html",
+    "html_to_rtf",
     "ReleaseInfo",
     "latest_release",
     "update_with_pip",
@@ -219,6 +222,76 @@ def remove_html(line: str) -> str:
         tag_start = new_line.find("<")
         tag_end = new_line.find(">", tag_start)
     return html.unescape(new_line).lstrip()
+
+
+tag_pattern: re.Pattern[str] = re.compile(
+    r"<\s*(?P<tag_name>\w+)(?:\s+[^>]*)?>(?P<content>.*?)(?:</\s*(?P=tag_name)\s*>|\n|$)"
+)
+
+tag_repl: dict[str, str] = {
+    "html": r"rtf1\ansi{\fonttbl\f0\fnil}",
+    "sup": "super",
+    "u": "ul",
+    "s": "strike",
+}
+char_repl: dict[str, str] = {"–": "-"}
+
+
+def rtf_escape(s: str) -> str:
+    return "".join(
+        (
+            c
+            if ord(c) < 128
+            else "\\u"
+            + str(int.from_bytes(c.encode("utf-16be")))
+            + char_repl.get(
+                c,
+                html.entities.codepoint2name.get(
+                    ord(c),
+                    unicodedata.name(c).split()[-1],
+                )[0],
+            )
+        )
+        for c in s
+    )
+
+
+def rtf_table(t: str) -> str:
+    r: list[str] = [r"\trowd"]
+    cols: int = 0
+    for tr, row in tag_pattern.findall(t):
+        if tr.lower() != "tr":
+            continue
+        # noinspection PyTypeChecker
+        cells: list[tuple[str, str]] = tag_pattern.findall(row)
+        cols = max(cols, len(cells))
+        for td, cell in cells:
+            if td.lower() != "td":
+                continue
+            r.append(cell + r"\cell")
+        r.append(r"\row")
+
+    r.insert(1, r"\cellx" * cols)
+    return "\n".join(r)
+
+
+def html_tag_to_rtf_tag(m: re.Match[str]) -> str:
+    tag_name: str = m.group("tag_name").casefold()
+    content: str = m.group("content")
+    if tag_name == "table":
+        return rtf_table(content)
+    if tag_name == "font":  # do nothing
+        return content
+    tag_name = tag_repl.get(tag_name, tag_name)
+    return "{\\" + tag_name + "\n" + content + "}"
+
+
+def html_to_rtf(htm: str) -> str:
+    htm = htm.replace(r"\&", "&").replace("\n", r"\par")
+    htm, n = tag_pattern.subn(html_tag_to_rtf_tag, htm)
+    while n:
+        htm, n = tag_pattern.subn(html_tag_to_rtf_tag, htm)
+    return rtf_escape(html.unescape(htm))
 
 
 def wrap_in_html(text: str, line_end: str = os.linesep) -> str:

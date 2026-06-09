@@ -44,6 +44,7 @@ from .substances_box import SubstanceBox
 from .utils import (
     ReleaseInfo,
     a_tag,
+    html_to_rtf,
     latest_release,
     p_tag,
     remove_html,
@@ -70,6 +71,7 @@ def copy_to_clipboard(text: str, text_type: Qt.TextFormat | str = Qt.TextFormat.
     if isinstance(text_type, str):
         mime_data.setData(text_type, text.encode())
     elif text_type == Qt.TextFormat.RichText:
+        mime_data.setData("text/rtf", html_to_rtf(tag("html", text)).encode("utf-8"))
         mime_data.setHtml(wrap_in_html(text))
         mime_data.setText(remove_html(text))
     else:
