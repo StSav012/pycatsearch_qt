@@ -1,5 +1,5 @@
+import re
 import sys
-from abc import ABCMeta
 from collections.abc import Callable, Sequence
 from contextlib import suppress
 from datetime import datetime, timedelta, timezone
@@ -11,7 +11,7 @@ from pycatsearch.catalog import Catalog
 from qtpy import PYSIDE2, QT6
 from qtpy.QtCore import QLibraryInfo, QLocale, QTranslator, Qt, qVersion
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QAbstractSpinBox, QApplication, QDialog, QMenu, QWidget
+from qtpy.QtWidgets import QAbstractSpinBox, QApplication, QDialog, QMenu
 
 __all__ = ["qta_icon", "main"]
 
@@ -22,10 +22,6 @@ try:
     from ._version import __version__
 except ImportError:
     __version__ = ""
-
-
-class _QWidgetMetaMixin(type(QWidget), ABCMeta):
-    pass
 
 
 if sys.version_info < (3, 10, 0) and __file__ != "<string>":
@@ -99,7 +95,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
         if not any(line.startswith("from __future__ import annotations") for line in lines):
             lines.insert(0, "from __future__ import annotations")
             new_text: str = "\n".join(lines)
-            new_text = new_text.replace("ParamSpec", "TypeVar")
+            new_text = re.sub(r"TypeGuard\[\w+](?=:)", "bool", new_text)
             if f.resolve() != me:
                 new_text = new_text.replace("__file__", repr(str(f.resolve())))
             parts: "tuple[str, ...]" = f.relative_to(my_parent).parts

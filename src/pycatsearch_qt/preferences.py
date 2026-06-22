@@ -1,9 +1,8 @@
-from abc import ABC, abstractmethod
-from collections.abc import Hashable
+from collections.abc import Hashable, Iterable
 from functools import partial
 from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, ClassVar, cast
+from typing import Any, Protocol, TypeGuard, cast
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -23,29 +22,30 @@ from qtpy.QtWidgets import (
     QWidget,
 )
 
-from . import _QWidgetMetaMixin
 from .open_file_path_entry import OpenFilePathEntry
 from .settings import Settings
 
 __all__ = ["Preferences"]
 
 
-class BaseLogger(ABC):
-    logger: ClassVar[Logger]
-    from typing import ParamSpec
-
-    _P = ParamSpec("_P")
-
-    def __new__(cls, *args: _P.args, **kwargs: _P.kwargs):
-        cls.logger = getLogger(cls.__name__)
-        return super().__new__(cls)
-
-    @abstractmethod
-    def __init__(self, *args: _P.args, **kwargs: _P.kwargs) -> None:
-        pass
+class HasLogger(Protocol):
+    logger: Logger
+    __call__ = ...
 
 
-class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
+def has_logger(cls: type) -> TypeGuard[HasLogger]:
+    return hasattr(cls, "logger")
+
+
+def with_logger(cls: type) -> HasLogger:
+    cls.logger = getLogger(cls.__name__)
+    if has_logger(cls):
+        return cls
+    raise RuntimeError
+
+
+@with_logger
+class PreferencePage(QScrollArea):
     """A page of the Preferences dialog."""
 
     def __init__(
@@ -61,7 +61,7 @@ class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
         settings: Settings,
         parent: QWidget | None = None,
     ) -> None:
-        QScrollArea.__init__(self, parent)
+        super().__init__(parent)
 
         widget: QWidget = QWidget(self)
         self.setWidget(widget)
@@ -176,14 +176,14 @@ class PreferencePage(BaseLogger, QScrollArea, metaclass=_QWidgetMetaMixin):
         return self._changed_settings.copy()
 
 
-class PreferencesBody(BaseLogger, QSplitter, metaclass=_QWidgetMetaMixin):
+@with_logger
+class PreferencesBody(QSplitter):
     """The main area of the GUI preferences dialog."""
 
     def __init__(self, settings: Settings, parent: QWidget | None = None) -> None:
         from . import qta_icon  # import locally to avoid a circular import
 
-        BaseLogger.__init__(self)
-        QSplitter.__init__(self, parent)
+        super().__init__(parent)
         self.setObjectName("preferencesBody")
 
         self.setOrientation(Qt.Orientation.Horizontal)
