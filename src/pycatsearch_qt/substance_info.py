@@ -1,5 +1,4 @@
 from collections.abc import Collection
-from contextlib import suppress
 from typing import TYPE_CHECKING
 
 from pycatsearch.utils import (
@@ -12,7 +11,7 @@ from pycatsearch.utils import (
     CatalogType,
 )
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QIcon
+from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import (
     QDialog,
     QDialogButtonBox,
@@ -20,7 +19,6 @@ from qtpy.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QMenu,
-    QStyle,
     QVBoxLayout,
     QWidget,
 )
@@ -28,7 +26,7 @@ from qtpy.QtWidgets import (
 from .html_style_delegate import HTMLDelegate
 from .selectable_label import SelectableLabel
 from .url_label import URLLabel
-from .utils import best_name, chem_html
+from .utils import best_name, chem_html, icon
 
 __all__ = ["SubstanceInfoSelector", "SubstanceInfo"]
 
@@ -77,7 +75,8 @@ class SubstanceInfoSelector(QDialog):
     def contextMenuEvent(self, event: QContextMenuEvent) -> None:
         context_menu: QMenu = QMenu(self)
         context_menu.addAction(
-            self._icon(
+            icon(
+                self,
                 "dialog-information",
                 "mdi6.flask-empty-outline",
                 "mdi6.information-variant",
@@ -88,27 +87,6 @@ class SubstanceInfoSelector(QDialog):
         )
         context_menu.exec(event.globalPos())
         return super().contextMenuEvent(event)
-
-    def _icon(
-        self,
-        theme_name: str,
-        *qta_name: str,
-        standard_pixmap: QStyle.StandardPixmap | None = None,
-        **qta_specs: object,
-    ) -> QIcon:
-        if theme_name and QIcon.hasThemeIcon(theme_name):
-            return QIcon.fromTheme(theme_name)
-
-        if qta_name:
-            with suppress(ImportError, Exception):
-                import qtawesome as qta
-
-                return qta.icon(*qta_name, **qta_specs)  # might raise an `Exception` if the icon is not in the font
-
-        if standard_pixmap is not None:
-            return self.style().standardIcon(standard_pixmap)
-
-        return QIcon()
 
     @Slot(QListWidgetItem)
     def _on_list_item_changed(self, item: QListWidgetItem) -> None:

@@ -12,7 +12,7 @@ from pycatsearch.utils import (
     CatalogType,
 )
 from qtpy.QtCore import QModelIndex, Qt, Signal, Slot
-from qtpy.QtGui import QContextMenuEvent, QIcon
+from qtpy.QtGui import QContextMenuEvent
 from qtpy.QtWidgets import (
     QAbstractItemView,
     QAbstractScrollArea,
@@ -23,7 +23,6 @@ from qtpy.QtWidgets import (
     QListWidgetItem,
     QMenu,
     QPushButton,
-    QStyle,
     QVBoxLayout,
     QWidget,
 )
@@ -31,7 +30,7 @@ from qtpy.QtWidgets import (
 from .html_style_delegate import HTMLDelegate
 from .settings import Settings
 from .substance_info import SubstanceInfo, SubstanceInfoSelector
-from .utils import best_name, remove_html
+from .utils import best_name, icon, remove_html
 
 __all__ = ["SubstanceBox"]
 
@@ -92,7 +91,8 @@ class SubstanceBox(QGroupBox):
 
         context_menu: QMenu = QMenu(self)
         context_menu.addAction(
-            self._icon(
+            icon(
+                self,
                 "dialog-information",
                 "mdi6.flask-empty-outline",
                 "mdi6.information-variant",
@@ -104,28 +104,17 @@ class SubstanceBox(QGroupBox):
         context_menu.exec(event.globalPos())
         return super().contextMenuEvent(event)
 
-    def _icon(
-        self,
-        theme_name: str,
-        *qta_name: str,
-        standard_pixmap: QStyle.StandardPixmap | None = None,
-        **qta_specs: object,
-    ) -> QIcon:
-        if theme_name and QIcon.hasThemeIcon(theme_name):
-            return QIcon.fromTheme(theme_name)
-
-        if qta_name:
-            with suppress(ImportError, Exception):
-                import qtawesome as qta
-
-                return qta.icon(*qta_name, **qta_specs)  # might raise an `Exception` if the icon is not in the font
-
-        if standard_pixmap is not None:
-            return self.style().standardIcon(standard_pixmap)
-
-        return QIcon()
-
     def _filter_substances_list(self, filter_text: str) -> dict[str, set[int]]:
+        def add_matching_tag_to_items_collection(_species_tag: int, _entry: CatalogEntryType) -> None:
+            if plain_text_name not in list_items:
+                list_items[plain_text_name] = set()
+            list_items[plain_text_name].add(_species_tag)
+            html_name = best_name(_entry, allow_html=allow_html)
+            try:
+                list_items[html_name].add(_species_tag)
+            except LookupError:
+                list_items[html_name] = {_species_tag}
+
         list_items: dict[str, set[int]] = dict()
         allow_html: bool = self._settings.rich_text_in_formulas
         plain_text_name: str
@@ -154,14 +143,7 @@ class SubstanceBox(QGroupBox):
                                 with suppress(LookupError):
                                     plain_text_name = remove_html(str(getattr(entry, name_key)))
                                     if match_function(plain_text_name):
-                                        if plain_text_name not in list_items:
-                                            list_items[plain_text_name] = set()
-                                        list_items[plain_text_name].add(species_tag)
-                                        html_name = best_name(entry, allow_html=allow_html)
-                                        try:
-                                            list_items[html_name].add(species_tag)
-                                        except LookupError:
-                                            list_items[html_name] = {species_tag}
+                                        add_matching_tag_to_items_collection(species_tag, entry)
             if not is_filter_regexp:
                 filter_text_lowercase: str = filter_text.casefold()
                 cmp_function: Callable[[str, str], bool]
@@ -174,14 +156,7 @@ class SubstanceBox(QGroupBox):
                                     name_key in (NAME, TRIVIAL_NAME)
                                     and cmp_function(plain_text_name.casefold(), filter_text_lowercase)
                                 ):
-                                    if plain_text_name not in list_items:
-                                        list_items[plain_text_name] = set()
-                                    list_items[plain_text_name].add(species_tag)
-                                    html_name = best_name(entry, allow_html=allow_html)
-                                    try:
-                                        list_items[html_name].add(species_tag)
-                                    except LookupError:
-                                        list_items[html_name] = {species_tag}
+                                    add_matching_tag_to_items_collection(species_tag, entry)
             # species tag suspected
             if filter_text.isdecimal():
                 for species_tag in self._catalog:
@@ -240,16 +215,19 @@ class SubstanceBox(QGroupBox):
                 self._list_substance.addItem(new_item)
 
         if not self._check_keep_selection.isChecked():
-            newly_selected_substances: set[int] = set().union(
-                *(
-                    (self._list_substance.item(row).data(Qt.ItemDataRole.UserRole) & self._selected_substances)
-                    for row in range(self._list_substance.count())
-                )
-            )
-            if newly_selected_substances != self._selected_substances:
-                self._selected_substances = newly_selected_substances
-                self.selectedSubstancesChanged.emit()
+            self._collect_currently_selected_substances()
         self._text_substance.setFocus()
+
+    def _collect_currently_selected_substances(self) -> None:
+        newly_selected_substances: set[int] = set().union(
+            *(
+                (self._list_substance.item(row).data(Qt.ItemDataRole.UserRole) & self._selected_substances)
+                for row in range(self._list_substance.count())
+            )
+        )
+        if newly_selected_substances != self._selected_substances:
+            self._selected_substances = newly_selected_substances
+            self.selectedSubstancesChanged.emit()
 
     @Slot(str)
     def _on_text_changed(self, current_text: str) -> None:
@@ -258,15 +236,7 @@ class SubstanceBox(QGroupBox):
     @Slot(bool)
     def _on_check_save_selection_toggled(self, new_state: bool) -> None:
         if not new_state:
-            newly_selected_substances: set[int] = set().union(
-                *(
-                    (self._list_substance.item(row).data(Qt.ItemDataRole.UserRole) & self._selected_substances)
-                    for row in range(self._list_substance.count())
-                )
-            )
-            if newly_selected_substances != self._selected_substances:
-                self._selected_substances = newly_selected_substances
-                self.selectedSubstancesChanged.emit()
+            self._collect_currently_selected_substances()
 
     @Slot()
     def _on_button_select_none_clicked(self) -> None:

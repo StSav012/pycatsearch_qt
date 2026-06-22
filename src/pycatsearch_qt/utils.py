@@ -6,10 +6,12 @@ import re
 import sys
 import unicodedata
 from collections.abc import Iterable, Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 from typing import Any, TypeVar
 
 from pycatsearch.utils import NAME, STOICHIOMETRIC_FORMULA, STRUCTURAL_FORMULA, CatalogEntryType
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QStyle, QWidget
 
 __all__ = [
     "chem_html",
@@ -24,6 +26,7 @@ __all__ = [
     "p_tag",
     "a_tag",
     "the",
+    "icon",
 ]
 
 
@@ -43,28 +46,28 @@ def tex_to_html_entity(s: str) -> str:
     fixes: dict[str, str] = {
         "neq": "#8800",
     }
-    while _i < len(s):
-        _c: str = s[_i]
-        if word_started and not _c.isalpha():
-            word_started = False
-            if s[word_start:_i] + ";" in html.entities.entitydefs:
-                s = s[: word_start - 1] + "&" + s[word_start:_i] + ";" + s[_i:]
-                _i += 2
-            elif s[word_start:_i] in fixes:
-                s = s[: word_start - 1] + "&" + fixes[s[word_start:_i]] + ";" + s[_i:]
-                _i += 2
-        if backslash_found and _c.isalpha() and not word_started:
-            word_start = _i
-            word_started = True
-        backslash_found = _c == "\\"
-        _i += 1
-    if word_started:
+
+    def replace_word() -> None:
+        nonlocal s, _i
         if s[word_start:_i] + ";" in html.entities.entitydefs:
             s = s[: word_start - 1] + "&" + s[word_start:_i] + ";" + s[_i:]
             _i += 2
         elif s[word_start:_i] in fixes:
             s = s[: word_start - 1] + "&" + fixes[s[word_start:_i]] + ";" + s[_i:]
             _i += 2
+
+    while _i < len(s):
+        _c: str = s[_i]
+        if word_started and not _c.isalpha():
+            word_started = False
+            replace_word()
+        if backslash_found and _c.isalpha() and not word_started:
+            word_start = _i
+            word_started = True
+        backslash_found = _c == "\\"
+        _i += 1
+    if word_started:
+        replace_word()
     return s
 
 
@@ -434,7 +437,7 @@ if sys.version_info < (3, 10, 0):
 
     # noinspection PyShadowingBuiltins,PyUnusedLocal
     def zip(*iterables: Iterable[Any], strict: bool = False) -> builtins.zip:
-        """Intentionally override `builtins.zip` to ignore `strict` parameter in Python < 3.10."""
+        """Intentionally override `builtins.zip` to ignore the `strict` parameter in Python < 3.10."""
         return builtins.zip(*iterables)
 
     __all__.append("zip")
@@ -446,3 +449,26 @@ _T = TypeVar("_T")
 @contextmanager
 def the(obj: _T) -> Iterator[_T]:
     yield obj
+
+
+# noinspection PyPackageRequirements,PyUnresolvedReferences
+def icon(
+    self: QWidget,
+    theme_name: str,
+    *qta_name: str,
+    standard_pixmap: QStyle.StandardPixmap | None = None,
+    **qta_specs: object,
+) -> QIcon:
+    if theme_name and QIcon.hasThemeIcon(theme_name):
+        return QIcon.fromTheme(theme_name)
+
+    if qta_name:
+        with suppress(ImportError, Exception):
+            import qtawesome as qta
+
+            return qta.icon(*qta_name, **qta_specs)  # might raise an `Exception` if the icon is not in the font
+
+    if standard_pixmap is not None:
+        return self.style().standardIcon(standard_pixmap)
+
+    return QIcon()

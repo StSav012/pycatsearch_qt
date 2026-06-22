@@ -51,6 +51,13 @@ class FoundLinesModel(QAbstractTableModel):
             self._intensity_str: str = ""
             self._lower_state_energy_str: str = ""
 
+        def _format_float_with_4_decimals(self, value: float) -> str:
+            if value == 0.0:
+                return "0"
+            if abs(value) < 0.1:
+                return f"{value:.4e}".replace(".", self.decimal_point)
+            return f"{value:.4f}".replace(".", self.decimal_point)
+
         @property
         def frequency_str(self) -> str:
             if not self._frequency_str:
@@ -60,23 +67,13 @@ class FoundLinesModel(QAbstractTableModel):
         @property
         def intensity_str(self) -> str:
             if not self._intensity_str:
-                if self.intensity == 0.0:
-                    self._intensity_str = "0"
-                elif abs(self.intensity) < 0.1:
-                    self._intensity_str = f"{self.intensity:.4e}".replace(".", self.decimal_point)
-                else:
-                    self._intensity_str = f"{self.intensity:.4f}".replace(".", self.decimal_point)
+                self._intensity_str = self._format_float_with_4_decimals(self.intensity)
             return self._intensity_str
 
         @property
         def lower_state_energy_str(self) -> str:
             if not self._lower_state_energy_str:
-                if self.lower_state_energy == 0.0:
-                    self._lower_state_energy_str = "0"
-                elif abs(self.lower_state_energy) < 0.1:
-                    self._lower_state_energy_str = f"{self.lower_state_energy:.4e}".replace(".", self.decimal_point)
-                else:
-                    self._lower_state_energy_str = f"{self.lower_state_energy:.4f}".replace(".", self.decimal_point)
+                self._lower_state_energy_str = self._format_float_with_4_decimals(self.lower_state_energy)
             return self._lower_state_energy_str
 
         def __eq__(self, other: object) -> bool:

@@ -183,7 +183,7 @@ class OpenFileDialog(FileDialog):
             self.setDefaultSuffix(all_extensions[0])
         self.setNameFilters(name_filters)
 
-    def get_open_filename(self) -> PurePath | None:
+    def _prepare(self) -> None:
         self._fill_filters()
 
         opened_filename: PurePath | None
@@ -193,6 +193,9 @@ class OpenFileDialog(FileDialog):
 
         self.settings.restore(self)
         self.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+
+    def get_open_filename(self) -> PurePath | None:
+        self._prepare()
         self.setFileMode(QFileDialog.FileMode.ExistingFile)
         if self.exec() and (file_path := self.selectedFile()):
             self.settings.save(self)
@@ -200,16 +203,8 @@ class OpenFileDialog(FileDialog):
             return file_path
         return None
 
-    def get_open_filenames(self) -> list[str | PathLike[str]]:
-        self._fill_filters()
-
-        opened_filename: PurePath | None
-        if opened_filename := self.settings.opened_file_name:
-            self.selectFile(opened_filename)
-            self.setDirectory(str(opened_filename.parent))
-
-        self.settings.restore(self)
-        self.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
+    def get_open_filenames(self) -> list[str]:
+        self._prepare()
         self.setFileMode(QFileDialog.FileMode.ExistingFiles)
         if self.exec() and (file_paths := self.selectedFiles()):
             self.settings.save(self)
