@@ -559,7 +559,7 @@
     <message>
         <location filename="../found_lines_model.py" line="107"/>
         <location filename="../found_lines_model.py" line="116"/>
-        <source>{value} [{unit}]</source>
+        <source>{value} ({unit})</source>
         <comment>unit format</comment>
         <translation>{value}, {unit}</translation>
     </message>

@@ -101,7 +101,7 @@ class FoundLinesModel(QAbstractTableModel):
         self._data: list[FoundLinesModel.DataType] = []
         self._rows_loaded: int = 0
 
-        unit_format: Final[str] = self.tr("{value} [{unit}]", "unit format")
+        unit_format: Final[str] = self.tr("{value} ({unit})", "unit format")
         self._header: Final[list[str]] = [
             self.tr("Substance"),
             unit_format.format(value=self.tr("Frequency"), unit=self._settings.frequency_unit_str),
@@ -110,7 +110,7 @@ class FoundLinesModel(QAbstractTableModel):
         ]
 
     def update_units(self) -> None:
-        unit_format: Final[str] = self.tr("{value} [{unit}]", "unit format")
+        unit_format: Final[str] = self.tr("{value} ({unit})", "unit format")
         self._header[FoundLinesModel.Columns.Frequency] = unit_format.format(
             value=self.tr("Frequency"),
             unit=self._settings.frequency_unit_str,
