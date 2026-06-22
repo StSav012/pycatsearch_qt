@@ -624,7 +624,7 @@
     </message>
     <message>
         <location filename="../substances_box.py" line="71"/>
-        <source>Keep substances list selection through filter changes</source>
+        <source>Keep substances' list selection through filter changes</source>
         <translation>Auswahl der Stoffliste durch Filteränderungen beibehalten</translation>
     </message>
     <message>
