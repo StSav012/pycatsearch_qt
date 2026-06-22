@@ -111,4 +111,6 @@ class AboutBox(QDialog):
 
 def about(parent: QWidget | None = None, title: str = "", text: str = "") -> int:
     box: AboutBox = AboutBox(parent=parent, title=title, text=text)
-    return box.exec()
+    res: int = box.exec()
+    box.deleteLater()
+    return res

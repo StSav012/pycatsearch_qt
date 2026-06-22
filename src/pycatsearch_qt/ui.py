@@ -340,6 +340,7 @@ class UI(QMainWindow):
             self.status_bar.showMessage(self.tr("Catalogs loaded."))
         self.catalog = cat or self.catalog
         self.box_substance.catalog = self.catalog.catalog
+        ws.deleteLater()
         self.setCursor(last_cursor)
         self.setEnabled(True)
         self.button_search.setDisabled(self.catalog.is_empty)
@@ -475,6 +476,7 @@ class UI(QMainWindow):
             parent=self,
         )
         downloader.exec()
+        downloader.deleteLater()
 
     @Slot()
     def _on_action_preferences_triggered(self) -> None:
@@ -564,6 +566,7 @@ class UI(QMainWindow):
                 parent=self,
             )
             syn.exec()
+            syn.deleteLater()
 
     def toggle_results_table_column_visibility(self, column: int, is_visible: bool) -> None:
         if is_visible != self.results_table.isColumnHidden(column):
@@ -618,6 +621,7 @@ class UI(QMainWindow):
             ci: CatalogInfo = CatalogInfo(settings=self.settings, catalog=self.catalog, parent=self)
             ci.catalogUpdated.connect(self._on_action_reload_triggered)
             ci.exec()
+            ci.deleteLater()
         else:
             QMessageBox.information(self, self.tr("Catalog Info"), self.tr("No catalogs loaded"))
 

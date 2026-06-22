@@ -118,6 +118,7 @@ class SourcesList(QTableWidget):
         )
         if ud.exec():
             self.catalogUpdated.emit()
+        ud.deleteLater()
 
     def extend(self, info: Iterable[CatalogSourceInfo]) -> None:
         row: int

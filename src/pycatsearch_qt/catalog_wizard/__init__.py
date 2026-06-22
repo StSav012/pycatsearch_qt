@@ -50,6 +50,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                         frequency_limits=self.frequency_limits(),
                     )
                     ws.exec()
+                    ws.deleteLater()
                 except OSError as ex:
                     QMessageBox.warning(
                         self,
@@ -75,6 +76,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                         frequency_limits=self.frequency_limits(),
                     )
                     ws.exec()
+                    ws.deleteLater()
                 except OSError as ex:
                     QMessageBox.warning(
                         self,

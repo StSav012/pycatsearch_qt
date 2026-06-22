@@ -102,6 +102,7 @@ class SubstanceInfoSelector(QDialog):
             parent=self,
         )
         syn.exec()
+        syn.deleteLater()
 
 
 class SubstanceInfo(QDialog):

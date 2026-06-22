@@ -285,6 +285,7 @@ class SubstanceBox(QGroupBox):
             )
             sis.tagSelectionChanged.connect(on_tag_selection_changed)
             sis.exec()
+            sis.deleteLater()
         elif species_tags:  # if not empty
             syn: SubstanceInfo = SubstanceInfo(
                 self.catalog,
@@ -293,6 +294,7 @@ class SubstanceBox(QGroupBox):
                 parent=self,
             )
             syn.exec()
+            syn.deleteLater()
 
     @Slot(QListWidgetItem)
     def _on_list_substance_item_changed(self, item: QListWidgetItem) -> None:
