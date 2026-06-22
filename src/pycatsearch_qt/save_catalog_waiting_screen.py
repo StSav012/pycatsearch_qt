@@ -1,7 +1,7 @@
 from os import PathLike
 
 from pycatsearch.utils import CatalogType, save_catalog_to_file
-from qtpy.QtCore import QCoreApplication, QMargins
+from qtpy.QtCore import QCoreApplication, QMargins, Qt
 from qtpy.QtWidgets import QWidget
 
 from .waiting_screen import WaitingScreen
@@ -18,6 +18,8 @@ class SaveCatalogWaitingScreen(WaitingScreen):
         catalog: CatalogType,
         frequency_limits: tuple[float, float],
         margins: int | QMargins | None = None,
+        label_alignment: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignCenter,
+        cancellable: bool = True,
     ) -> WaitingScreen[bool]:
         return WaitingScreen(
             parent=parent,
@@ -25,4 +27,6 @@ class SaveCatalogWaitingScreen(WaitingScreen):
             target=save_catalog_to_file,
             kwargs=dict(filename=filename, catalog=catalog, frequency_limits=frequency_limits),
             margins=margins,
+            label_alignment=label_alignment,
+            cancellable=cancellable,
         )
