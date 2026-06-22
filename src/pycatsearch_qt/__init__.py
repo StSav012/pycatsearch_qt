@@ -1,3 +1,4 @@
+# ruff: noqa: UP037
 import re
 import sys
 from collections.abc import Callable, Sequence
@@ -289,6 +290,7 @@ def _make_old_qt_compatible_again() -> None:
             QMenu.exec = lambda self, pos: self.exec_(pos)
 
 
+# noinspection PyPackageRequirements,PyUnresolvedReferences
 def qta_icon(*qta_name: str, **qta_specs: object) -> QIcon:
     if qta_name:
         with suppress(ImportError, Exception):

@@ -9,10 +9,12 @@ from qtpy.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 __all__ = ["WaitingScreen"]
 
 
+# noinspection PyUnresolvedReferences
 def _spinner(parent: QWidget | None = None) -> QWidget | None:
     from contextlib import suppress
 
     with suppress(ImportError, Exception):
+        # noinspection PyPackageRequirements
         import qtawesome as qta
 
         spinner: qta.IconWidget = qta.IconWidget(parent=parent)
