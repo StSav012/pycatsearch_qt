@@ -30,6 +30,7 @@ class HTMLDelegate(QStyledItemDelegate):
         painter.translate(0, 0.5 * (option.rect.height() - doc.size().height()))
         doc.documentLayout().draw(painter, ctx)
         painter.restore()
+        doc.deleteLater()
 
     def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex | QPersistentModelIndex) -> QSize:
         options: QStyleOptionViewItem = QStyleOptionViewItem(option)
@@ -37,4 +38,9 @@ class HTMLDelegate(QStyledItemDelegate):
         doc: QTextDocument = QTextDocument(self)
         doc.setHtml(options.text)
         doc.setTextWidth(options.rect.width())
-        return QSize(round(doc.idealWidth()), round(QTextDocument().size().height()))
+        size: QSize = QSize(
+            round(doc.idealWidth()),
+            round(QTextDocument().size().height()),
+        )
+        doc.deleteLater()
+        return size
