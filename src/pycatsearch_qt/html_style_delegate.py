@@ -25,6 +25,8 @@ class HTMLDelegate(QStyledItemDelegate):
             ctx.palette.setBrush(QPalette.ColorRole.Text, option.palette.highlightedText())
         text_rect: QRect = style.subElementRect(QStyle.SubElement.SE_ItemViewItemText, option)
         painter.save()
+        if option.state & QStyle.StateFlag.State_Selected:
+            painter.fillRect(option.rect, option.palette.highlight())
         painter.translate(text_rect.topLeft())
         painter.setClipRect(option.rect.translated(-text_rect.topLeft()))
         painter.translate(0, 0.5 * (option.rect.height() - doc.size().height()))
