@@ -337,9 +337,9 @@ class UI(QMainWindow):
             else:
                 self.status_bar.showMessage(self.tr("Failed to load a catalog."))
         else:
+            self.catalog = cat
+            self.box_substance.catalog = self.catalog.catalog
             self.status_bar.showMessage(self.tr("Catalogs loaded."))
-        self.catalog = cat or self.catalog
-        self.box_substance.catalog = self.catalog.catalog
         ws.deleteLater()
         self.setCursor(last_cursor)
         self.setEnabled(True)
