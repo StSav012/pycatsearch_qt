@@ -3,5 +3,5 @@ global-exclude *.ts
 global-exclude .*
 exclude *.sh
 exclude requirements.txt
-prune src/test/
+prune test/
 prune .*/
