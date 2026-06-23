@@ -2,7 +2,7 @@ from collections.abc import Mapping, Sequence
 from threading import Thread
 from typing import Any, Callable, Generic, TypeVar
 
-from qtpy.QtCore import QCoreApplication, QEventLoop, QMargins, QSize, Qt
+from qtpy.QtCore import QCoreApplication, QMargins, QSize, Qt
 from qtpy.QtGui import QKeySequence, QTextDocument
 from qtpy.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
@@ -129,7 +129,7 @@ class WaitingScreen(QWidget, Generic[_T]):
         self.show()
         self._thread.start()
         while self.active:
-            QCoreApplication.processEvents(QEventLoop.ProcessEventsFlag.WaitForMoreEvents)
+            QCoreApplication.processEvents()
             QCoreApplication.sendPostedEvents()
         if self._thread is not None:
             self._thread.join()
