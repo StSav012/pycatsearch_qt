@@ -96,6 +96,9 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
         if not any(line.startswith("from __future__ import annotations") for line in lines):
             lines.insert(0, "from __future__ import annotations")
             new_text: str = "\n".join(lines)
+            new_text = re.sub(r"from typing import TypeGuard$", "", new_text)
+            new_text = re.sub(r"(from typing import) TypeGuard,(.*)", r"\1\2", new_text)
+            new_text = re.sub(r"(from typing import\b.*?), TypeGuard\b(.*)", r"\1\2", new_text)
             new_text = re.sub(r"TypeGuard\[\w+](?=:)", "bool", new_text)
             if f.resolve() != me:
                 new_text = new_text.replace("__file__", repr(str(f.resolve())))
