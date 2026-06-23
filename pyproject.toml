@@ -42,9 +42,6 @@ local_scheme = 'no-local-version'
 version_scheme = 'no-guess-dev'
 write_to = 'src/pycatsearch_qt/_version.py'
 
-[tool.setuptools.dynamic]
-version = {attr = 'pycatsearch_qt._version.__version__'}
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
