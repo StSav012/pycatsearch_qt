@@ -7,7 +7,8 @@ import sys
 import unicodedata
 from collections.abc import Iterable, Iterator
 from contextlib import contextmanager, suppress
-from typing import Any, TypeVar
+from logging import Logger, getLogger
+from typing import Any, Protocol, TypeGuard, TypeVar
 
 from pycatsearch.utils import NAME, STOICHIOMETRIC_FORMULA, STRUCTURAL_FORMULA, CatalogEntryType
 from qtpy.QtGui import QIcon
@@ -27,6 +28,7 @@ __all__ = [
     "a_tag",
     "the",
     "icon",
+    "with_logger",
 ]
 
 
@@ -472,3 +474,20 @@ def icon(
         return self.style().standardIcon(standard_pixmap)
 
     return QIcon()
+
+
+class HasLogger(Protocol):
+    logger: Logger
+    __call__ = ...
+
+
+def has_logger(cls: type) -> TypeGuard[HasLogger]:
+    return hasattr(cls, "logger")
+
+
+def with_logger(cls: type) -> HasLogger:
+    # noinspection PyUnresolvedReferences
+    cls.logger = getLogger(cls.__name__)
+    if has_logger(cls):
+        return cls
+    raise RuntimeError

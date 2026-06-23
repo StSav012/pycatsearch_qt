@@ -1,8 +1,7 @@
 from collections.abc import Hashable, Iterable
 from functools import partial
-from logging import Logger, getLogger
 from pathlib import Path
-from typing import Any, Protocol, TypeGuard, cast
+from typing import Any, cast
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -24,24 +23,9 @@ from qtpy.QtWidgets import (
 
 from .open_file_path_entry import OpenFilePathEntry
 from .settings import Settings
+from .utils import with_logger
 
 __all__ = ["Preferences"]
-
-
-class HasLogger(Protocol):
-    logger: Logger
-    __call__ = ...
-
-
-def has_logger(cls: type) -> TypeGuard[HasLogger]:
-    return hasattr(cls, "logger")
-
-
-def with_logger(cls: type) -> HasLogger:
-    cls.logger = getLogger(cls.__name__)
-    if has_logger(cls):
-        return cls
-    raise RuntimeError
 
 
 @with_logger
