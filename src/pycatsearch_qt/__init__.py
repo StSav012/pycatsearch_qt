@@ -352,7 +352,7 @@ def main() -> int:
     logging.basicConfig(
         level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
         datefmt="%Y-%m-%dT%H-%M-%S",
-        format="%(levelname)s:%(asctime)s:%(name)s:%(message)s"
+        format="%(levelname)s:%(asctime)s:%(name)s:%(message)s",
     )
     logging.debug(f"logging level set to {logging.root.level}")
 
