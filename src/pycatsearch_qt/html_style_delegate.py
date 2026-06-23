@@ -7,7 +7,6 @@ from .utils import the
 __all__ = ["HTMLDelegate"]
 
 
-
 class HTMLDelegate(QStyledItemDelegate):
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
