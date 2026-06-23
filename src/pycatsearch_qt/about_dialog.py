@@ -3,6 +3,7 @@ import sys
 from functools import partial
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
+from types import ModuleType
 
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import (
@@ -56,14 +57,26 @@ class AboutBox(QDialog):
         prefixes: list[Path] = [
             Path(prefix).resolve() for prefix in site.getsitepackages([sys.exec_prefix, sys.prefix])
         ]
-        for module_name, module in sys.modules.copy().items():
-            paths = getattr(module, "__path__", [])
+        modules: list[tuple[str, ModuleType, list[Path]]] = [
+            (module_name, module, [Path(p).resolve() for p in getattr(module, "__path__", [])])
+            for module_name, module in sys.modules.items()
+        ]
+        for module_name, module, paths in modules:
             if (
                 "." not in module_name
                 and module_name != "_distutils_hack"
                 and paths
                 and getattr(module, "__package__", "")
-                and any(prefix in Path(p).resolve().parents for p in paths for prefix in prefixes)
+                # instead of `prefix in p.parents`, it should be `is_relative_to`, but it appeared only in Python 3.9
+                and any(prefix in p.parents for p in paths for prefix in prefixes)
+                # ensure the module is not a submodule of another imported module
+                and not any(
+                    another_path in p.parents
+                    for p in paths
+                    for another_module_name, _, other_paths in modules
+                    if another_module_name != module_name
+                    for another_path in other_paths
+                )
             ):
                 try:
                     third_party_modules.append((module_name, version(module_name)))
