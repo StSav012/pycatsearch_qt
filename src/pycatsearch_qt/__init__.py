@@ -41,24 +41,27 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
                 return isinstance(self._modules[module_name], dict)
 
             def get_code(self, module_name: str) -> CodeType:
-                return compile(self._modules[module_name], filename="<string>", mode="exec")
+                substituted_module: str | dict = self._modules[module_name]
+                if isinstance(substituted_module, str):
+                    return compile(substituted_module, filename="<string>", mode="exec")
+                raise ImportError(module_name)
 
             def create_module(self, spec: ModuleSpec) -> "ModuleType | None":
                 return ModuleType(spec.name)
 
             def exec_module(self, module: ModuleType) -> None:
-                if module.__name__ not in self._modules:
-                    raise ImportError(module.__name__)
+                module_name: str = module.__name__
+                if module_name not in self._modules:
+                    raise ImportError(module_name)
 
-                sys.modules[module.__name__] = module
-                if not self.is_package(module.__name__):
-                    exec(self._modules[module.__name__], module.__dict__)
+                sys.modules[module_name] = module
+                substituted_module: str | dict = self._modules[module_name]
+                if not isinstance(substituted_module, dict):
+                    exec(substituted_module, module.__dict__)
                 else:
-                    for sub_module in self._modules[module.__name__]:
-                        self._modules[".".join((module.__name__, sub_module))] = self._modules[module.__name__][
-                            sub_module
-                        ]
-                    exec(self._modules[module.__name__].get("__init__", ""), module.__dict__)
+                    for sub_module in substituted_module:
+                        self._modules[".".join((module_name, sub_module))] = substituted_module[sub_module]
+                    exec(substituted_module.get("__init__", ""), module.__dict__)
 
         def __init__(self, **modules: "str | dict") -> None:
             self._modules: "dict[str, str | dict]" = modules
@@ -107,9 +110,9 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             for part in parts[:-1]:
                 if part not in p:
                     p[part] = {}
-                if not isinstance(p[part], dict):
+                if not isinstance((p_part := p[part]), dict):
                     continue
-                p = p[part]
+                p = p_part
             p[parts[-1][: -len(me.suffix)]] = new_text
 
     if py38_modules:
@@ -203,6 +206,7 @@ def _make_old_qt_compatible_again() -> None:
             release_time=datetime.fromisoformat(to_iso_format("2023-03-28T23:06:05Z")),
         )
         if QT6:
+            # noinspection PyUnresolvedReferences
             QLibraryInfo.LibraryLocation = QLibraryInfo.LibraryPath
     if Version(__version__) < Version("2.4.0"):
         _warn_about_outdated_package(
@@ -257,13 +261,16 @@ def _make_old_qt_compatible_again() -> None:
                     if len(args) == 3:
                         icon, text, shortcut = args
                         action = old_add_action(self, icon, text)
+                        # noinspection PyTypeChecker
                         action.setShortcut(QKeySequence(shortcut))
                     elif len(args) == 4:
                         icon, text, shortcut, receiver = args
                         action = old_add_action(self, icon, text, receiver)
+                        # noinspection PyTypeChecker
                         action.setShortcut(QKeySequence(shortcut))
                     elif len(args) == 5:
                         icon, text, shortcut, receiver, member = args
+                        # noinspection PyTypeChecker
                         action = old_add_action(self, icon, text, receiver, member, QKeySequence(shortcut))
                     else:
                         return old_add_action(self, *args)
