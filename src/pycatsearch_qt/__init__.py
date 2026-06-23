@@ -305,6 +305,8 @@ def qta_icon(*qta_name: str, **qta_specs: object) -> QIcon:
 
 
 def main() -> int:
+    import logging
+    import os
     from argparse import ZERO_OR_MORE, ArgumentParser, Namespace
 
     ap: ArgumentParser = ArgumentParser(
@@ -347,6 +349,28 @@ def main() -> int:
             QApplication.installTranslator(my_translator)
             break
 
+    logging.basicConfig(
+        level=getattr(logging, os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO),
+        datefmt="%Y-%m-%dT%H-%M-%S",
+        format="%(levelname)s:%(asctime)s:%(name)s:%(message)s"
+    )
+    logging.debug(f"logging level set to {logging.root.level}")
+
     window: UI = UI(Catalog(*args.catalog))
     window.show()
+
+    if logging.root.level <= logging.DEBUG:
+        from qtpy.QtCore import QObject, QTimer, Slot
+
+        @Slot()
+        def on_timeout() -> None:
+            def count_children(parent: QObject) -> int:
+                return sum(1 + count_children(child) for child in parent.children())
+
+            logging.root.debug(f"{count_children(window)} children")
+
+        timer: QTimer = QTimer(window)
+        timer.timeout.connect(on_timeout)
+        timer.start(1000)
+
     return app.exec()
