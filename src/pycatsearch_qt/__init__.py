@@ -188,8 +188,7 @@ def _make_old_qt_compatible_again() -> None:
             for _p in patterns:
                 match = re.fullmatch(_p, s)
                 if match is not None:
-                    s = patterns[_p](match)
-                    break
+                    return patterns[_p](match)
 
         return s
 
