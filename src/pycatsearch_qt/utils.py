@@ -391,8 +391,8 @@ def latest_release() -> ReleaseInfo:
     if not pub_dates or pub_dates[0].nodeType != dom.Node.ELEMENT_NODE:
         return ReleaseInfo()
     pub_date: dom.Element = pub_dates[0]
-    title_value: dom.Node = title.firstChild
-    pub_date_value: dom.Node = pub_date.firstChild
+    title_value: dom.Node | None = title.firstChild
+    pub_date_value: dom.Node | None = pub_date.firstChild
     if not isinstance(title_value, dom.Text) or not isinstance(pub_date_value, dom.Text):
         return ReleaseInfo()
 
