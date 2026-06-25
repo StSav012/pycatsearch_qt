@@ -409,10 +409,10 @@ def update_with_pip() -> None:
         args=[
             sys.executable,
             "-c",
-            f"""import sys, subprocess, time; time.sleep(2);\
-        subprocess.run(args=[sys.executable, '-m', 'ensurepip']);\
-        subprocess.run(args=[sys.executable, '-m', 'pip', 'install', '-U', {__original_name__!r}]);\
-        subprocess.Popen(args=[sys.executable, '-m', {__original_name__!r}])""",
+            f"""import sys, subprocess as s, time; time.sleep(2); m = [sys.executable, '-m'];\
+        s.run(args=[*m, 'ensurepip']);\
+        s.run(args=[*m, 'pip', 'install', '-U', {__original_name__!r}]);\
+        s.Popen(args=[*m, {__original_name__!r}])""",
         ]
     )
     sys.exit(0)
