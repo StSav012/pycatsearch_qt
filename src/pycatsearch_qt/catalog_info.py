@@ -116,9 +116,11 @@ class SourcesList(QTableWidget):
             existing_catalog_location=file_location,
             parent=self.parent(),
         )
-        if ud.exec():
-            self.catalogUpdated.emit()
-        ud.deleteLater()
+        try:
+            if ud.exec():
+                self.catalogUpdated.emit()
+        finally:
+            ud.deleteLater()
 
     def extend(self, info: Iterable[CatalogSourceInfo]) -> None:
         row: int

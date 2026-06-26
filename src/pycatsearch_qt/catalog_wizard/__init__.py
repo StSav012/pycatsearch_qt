@@ -42,15 +42,14 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
         ws: WaitingScreen[bool]
         if exit_code == QDialog.DialogCode.Accepted and self.catalog:
             if self.default_save_location is not None:
+                ws = SaveCatalogWaitingScreen(
+                    self,
+                    filename=self.default_save_location,
+                    catalog=self.catalog,
+                    frequency_limits=self.frequency_limits(),
+                )
                 try:
-                    ws = SaveCatalogWaitingScreen(
-                        self,
-                        filename=self.default_save_location,
-                        catalog=self.catalog,
-                        frequency_limits=self.frequency_limits(),
-                    )
                     ws.exec()
-                    ws.deleteLater()
                 except OSError as ex:
                     QMessageBox.warning(
                         self,
@@ -62,21 +61,22 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                     )
                 else:
                     return super().done(exit_code)
+                finally:
+                    ws.deleteLater()
 
             save_filename: PurePath | None
             while True:
                 if not (save_filename := self.save_dialog.get_save_filename()):
                     return super().done(QDialog.DialogCode.Rejected)
 
+                ws = SaveCatalogWaitingScreen(
+                    self,
+                    filename=save_filename,
+                    catalog=self.catalog,
+                    frequency_limits=self.frequency_limits(),
+                )
                 try:
-                    ws = SaveCatalogWaitingScreen(
-                        self,
-                        filename=save_filename,
-                        catalog=self.catalog,
-                        frequency_limits=self.frequency_limits(),
-                    )
                     ws.exec()
-                    ws.deleteLater()
                 except OSError as ex:
                     QMessageBox.warning(
                         self,
@@ -87,5 +87,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
                     )
                 else:
                     return super().done(exit_code)
+                finally:
+                    ws.deleteLater()
 
         return super().done(exit_code)

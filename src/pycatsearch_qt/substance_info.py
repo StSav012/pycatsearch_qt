@@ -101,8 +101,10 @@ class SubstanceInfoSelector(QDialog):
             inchi_key_search_url_template=self._inchi_key_search_url_template,
             parent=self,
         )
-        syn.exec()
-        syn.deleteLater()
+        try:
+            syn.exec()
+        finally:
+            syn.deleteLater()
 
 
 class SubstanceInfo(QDialog):

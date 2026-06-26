@@ -328,7 +328,10 @@ class UI(QMainWindow):
             args=catalog_file_names,
             label_alignment=Qt.AlignmentFlag.AlignLeading,
         )
-        cat: Catalog | None = ws.exec()
+        try:
+            cat: Catalog | None = ws.exec()
+        finally:
+            ws.deleteLater()
         if cat is None or cat.is_empty:
             if ws.is_cancelled():
                 self.status_bar.showMessage(self.tr("Loading has been cancelled."))
@@ -338,7 +341,6 @@ class UI(QMainWindow):
             self.catalog = cat
             self.box_substance.catalog = self.catalog.catalog
             self.status_bar.showMessage(self.tr("Catalogs loaded."))
-        ws.deleteLater()
         self.setCursor(last_cursor)
         self.setEnabled(True)
         catalog_is_not_empty: bool = bool(self.catalog)
@@ -396,13 +398,13 @@ class UI(QMainWindow):
             if not (save_filename := self.save_dialog.get_save_filename()):
                 return
 
+            ws = SaveCatalogWaitingScreen(
+                parent=self,
+                filename=save_filename,
+                catalog=catalog,
+                frequency_limits=frequency_limits,
+            )
             try:
-                ws = SaveCatalogWaitingScreen(
-                    self,
-                    filename=save_filename,
-                    catalog=catalog,
-                    frequency_limits=frequency_limits,
-                )
                 ws.exec()
             except OSError as ex:
                 QMessageBox.warning(
@@ -415,6 +417,8 @@ class UI(QMainWindow):
                 )
             else:
                 return
+            finally:
+                ws.deleteLater()
 
     def stringify_selection_html(self) -> str:
         """Convert selected rows to string for copying as rich text.
@@ -474,8 +478,10 @@ class UI(QMainWindow):
             frequency_limits=(self.catalog.min_frequency, self.catalog.max_frequency),
             parent=self,
         )
-        downloader.exec()
-        downloader.deleteLater()
+        try:
+            downloader.exec()
+        finally:
+            downloader.deleteLater()
 
     @Slot()
     def _on_action_preferences_triggered(self) -> None:
@@ -564,8 +570,10 @@ class UI(QMainWindow):
                 inchi_key_search_url_template=self.settings.inchi_key_search_url_template,
                 parent=self,
             )
-            syn.exec()
-            syn.deleteLater()
+            try:
+                syn.exec()
+            finally:
+                syn.deleteLater()
 
     def toggle_results_table_column_visibility(self, column: int, is_visible: bool) -> None:
         if is_visible != self.results_table.isColumnHidden(column):
@@ -619,8 +627,10 @@ class UI(QMainWindow):
         if self.catalog:
             ci: CatalogInfo = CatalogInfo(settings=self.settings, catalog=self.catalog, parent=self)
             ci.catalogUpdated.connect(self._on_action_reload_triggered)
-            ci.exec()
-            ci.deleteLater()
+            try:
+                ci.exec()
+            finally:
+                ci.deleteLater()
         else:
             QMessageBox.information(self, self.tr("Catalog Info"), self.tr("No catalogs loaded"))
 
