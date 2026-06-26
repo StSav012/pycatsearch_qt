@@ -81,11 +81,12 @@ def copy_to_clipboard(text: str, text_type: Qt.TextFormat | str = Qt.TextFormat.
 
 @final
 class UI(QMainWindow):
-    def __init__(self, catalog: Catalog, parent: QWidget | None = None) -> None:
+    def __init__(self, *catalog_file_names: str | os.PathLike[str], parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setObjectName("mainWindow")
 
-        self.catalog: Catalog = catalog
+        self.catalog: Catalog = Catalog()
+
         self.settings: Settings = Settings("SavSoft", "CatSearch", self)
 
         self.open_dialog: CatalogOpenFileDialog = CatalogOpenFileDialog(settings=self.settings, parent=self)
@@ -231,7 +232,7 @@ class UI(QMainWindow):
         self.temperature: float = 300.0  # [K]
         self.minimal_intensity: float = -inf  # [log10(nm²×MHz)]
 
-        self.button_search.setDisabled(self.catalog.is_empty)
+        self.load_catalog(*catalog_file_names)
 
         self.preferences_dialog: Preferences = Preferences(self.settings, self)
 
@@ -272,9 +273,6 @@ class UI(QMainWindow):
         self.menu_bar.action_show_lower_state_energy.toggled.connect(self._on_action_show_lower_state_energy_toggled)
         self.menu_bar.action_substance_info.triggered.connect(self._on_action_substance_info_triggered)
         self.menu_bar.action_clear.triggered.connect(self._on_action_clear_triggered)
-
-        if not self.catalog.is_empty:
-            self.box_frequency.set_frequency_limits(self.catalog.min_frequency, self.catalog.max_frequency)
 
         if self.settings.check_updates:
             _latest_release: ReleaseInfo = latest_release()

@@ -8,7 +8,6 @@ from functools import partialmethod
 from pathlib import Path
 
 from packaging.version import Version
-from pycatsearch.catalog import Catalog
 from qtpy import PYSIDE2, QT6
 from qtpy.QtCore import QLibraryInfo, QLocale, QTranslator, Qt, qVersion
 from qtpy.QtGui import QIcon
@@ -374,7 +373,7 @@ def main() -> int:
     )
     logging.debug(f"logging level set to {logging.root.level}")
 
-    window: UI = UI(Catalog(*args.catalog))
+    window: UI = UI(*args.catalog)
     window.show()
 
     if logging.root.level <= logging.DEBUG:
