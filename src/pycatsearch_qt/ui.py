@@ -341,12 +341,13 @@ class UI(QMainWindow):
         ws.deleteLater()
         self.setCursor(last_cursor)
         self.setEnabled(True)
-        self.button_search.setDisabled(self.catalog.is_empty)
-        self.menu_bar.action_reload.setDisabled(self.catalog.is_empty)
-        self.menu_bar.action_save_as.setDisabled(self.catalog.is_empty)
-        if not self.catalog.is_empty:
+        catalog_is_not_empty: bool = bool(self.catalog)
+        self.button_search.setEnabled(catalog_is_not_empty)
+        self.menu_bar.action_reload.setEnabled(catalog_is_not_empty)
+        self.menu_bar.action_save_as.setEnabled(catalog_is_not_empty)
+        if catalog_is_not_empty:
             self.box_frequency.set_frequency_limits(self.catalog.min_frequency, self.catalog.max_frequency)
-        return not self.catalog.is_empty
+        return catalog_is_not_empty
 
     @Slot(float)
     def _on_spin_temperature_changed(self, arg1: float) -> None:
