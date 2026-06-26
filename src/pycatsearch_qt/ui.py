@@ -51,6 +51,7 @@ from .utils import (
     tag,
     the,
     update_with_pip,
+    with_logger,
     wrap_in_html,
 )
 from .waiting_screen import WaitingScreen
@@ -79,6 +80,7 @@ def copy_to_clipboard(text: str, text_type: Qt.TextFormat | str = Qt.TextFormat.
     clipboard.setMimeData(mime_data, QClipboard.Mode.Clipboard)
 
 
+@with_logger
 @final
 class UI(QMainWindow):
     def __init__(self, *catalog_file_names: str | os.PathLike[str], parent: QWidget | None = None) -> None:
@@ -330,17 +332,21 @@ class UI(QMainWindow):
         )
         try:
             cat: Catalog | None = ws.exec()
+        except Exception as ex:
+            self.status_bar.showMessage(self.tr("Failed to load a catalog."))
+            UI.logger.error(ex)
+        else:
+            if cat is None or cat.is_empty:
+                if ws.is_cancelled():
+                    self.status_bar.showMessage(self.tr("Loading has been cancelled."))
+                else:
+                    self.status_bar.showMessage(self.tr("Failed to load a catalog."))
+            else:
+                self.catalog = cat
+                self.box_substance.catalog = self.catalog.catalog
+                self.status_bar.showMessage(self.tr("Catalogs loaded."))
         finally:
             ws.deleteLater()
-        if cat is None or cat.is_empty:
-            if ws.is_cancelled():
-                self.status_bar.showMessage(self.tr("Loading has been cancelled."))
-            else:
-                self.status_bar.showMessage(self.tr("Failed to load a catalog."))
-        else:
-            self.catalog = cat
-            self.box_substance.catalog = self.catalog.catalog
-            self.status_bar.showMessage(self.tr("Catalogs loaded."))
         self.setCursor(last_cursor)
         self.setEnabled(True)
         catalog_is_not_empty: bool = bool(self.catalog)
