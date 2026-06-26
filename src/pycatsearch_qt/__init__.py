@@ -27,35 +27,38 @@ except ImportError:
 
 if sys.version_info < (3, 10, 0) and __file__ != "<string>":
     from importlib import import_module
-    from importlib.abc import Loader, MetaPathFinder
+    from importlib.abc import ExecutionLoader, MetaPathFinder
     from importlib.machinery import ModuleSpec
     from importlib.util import spec_from_file_location
-    from types import CodeType, ModuleType
+    from types import ModuleType
 
     class StringImporter(MetaPathFinder):
-        class Loader(Loader):
+        class StringLoader(ExecutionLoader):
             def __init__(self, modules: "dict[str, str | dict]") -> None:
                 self._modules: "dict[str, str | dict]" = modules
 
-            def is_package(self, module_name: str) -> bool:
-                return isinstance(self._modules[module_name], dict)
-
-            def get_code(self, module_name: str) -> CodeType:
-                substituted_module: str | dict = self._modules[module_name]
-                if isinstance(substituted_module, str):
-                    return compile(substituted_module, filename="<string>", mode="exec")
-                raise ImportError(module_name)
+            def is_package(self, fullname: str) -> bool:
+                try:
+                    return isinstance(self._modules[fullname], dict)
+                except LookupError:
+                    return super().is_package(fullname)
 
             def create_module(self, spec: ModuleSpec) -> "ModuleType | None":
                 return ModuleType(spec.name)
 
+            def get_source(self, fullname: str) -> "str | None":
+                if isinstance((source := self._modules.get(fullname)), str):
+                    return source
+                return None
+
             def exec_module(self, module: ModuleType) -> None:
                 module_name: str = module.__name__
                 if module_name not in self._modules:
-                    raise ImportError(module_name)
+                    super().exec_module(module)
+                    return
 
                 sys.modules[module_name] = module
-                substituted_module: str | dict = self._modules[module_name]
+                substituted_module: "str | dict" = self._modules[module_name]
                 if not isinstance(substituted_module, dict):
                     exec(substituted_module, module.__dict__)
                 else:
@@ -63,9 +66,16 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
                         self._modules[".".join((module_name, sub_module))] = substituted_module[sub_module]
                     exec(substituted_module.get("__init__", ""), module.__dict__)
 
+            def get_filename(self, fullname: str) -> str:
+                if fullname == __original_name__:
+                    return str(me)
+                if fullname.startswith(__original_name__ + "."):
+                    return str(my_parent / Path(*fullname.split(".")[1:]))
+                raise ImportError(fullname)
+
         def __init__(self, **modules: "str | dict") -> None:
             self._modules: "dict[str, str | dict]" = modules
-            self._loader = StringImporter.Loader(modules)
+            self._loader = StringImporter.StringLoader(modules)
 
         def find_spec(
             self,
@@ -74,7 +84,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             target: "ModuleType | None" = None,
         ) -> "ModuleSpec | None":
             if fullname in self._modules:
-                spec: ModuleSpec | None = spec_from_file_location(fullname, loader=self._loader)
+                spec: "ModuleSpec | None" = spec_from_file_location(fullname, loader=self._loader)
                 if spec is not None:
                     spec.origin = "<string>"
                 return spec
@@ -82,6 +92,9 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
 
     def list_files(path: Path, *, suffix: "str | None" = None) -> "list[Path]":
         files: "list[Path]" = []
+        if path.name.startswith("."):
+            # ignore hidden files
+            return []
         if path.is_dir():
             for file in path.iterdir():
                 files.extend(list_files(file, suffix=suffix))
@@ -110,9 +123,8 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
             for part in parts[:-1]:
                 if part not in p:
                     p[part] = {}
-                if not isinstance((p_part := p[part]), dict):
-                    continue
-                p = p_part
+                if isinstance((p_part := p[part]), dict):
+                    p = p_part
             p[parts[-1][: -len(me.suffix)]] = new_text
 
     if py38_modules:
