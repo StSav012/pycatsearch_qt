@@ -402,19 +402,31 @@ def latest_release() -> ReleaseInfo:
 def update_with_pip() -> None:
     import subprocess
     import sys
+    from importlib.util import find_spec
 
     from . import __original_name__
 
-    subprocess.Popen(
-        args=[
-            sys.executable,
-            "-c",
-            f"""import sys, subprocess as s, time; time.sleep(2); m = [sys.executable, '-m'];\
-        s.run(args=[*m, 'ensurepip']);\
-        s.run(args=[*m, 'pip', 'install', '-U', {__original_name__!r}]);\
-        s.Popen(args=[*m, {__original_name__!r}])""",
-        ]
-    )
+    if find_spec("pip") is None:
+        subprocess.Popen(
+            args=[
+                sys.executable,
+                "-c",
+                f"""import sys, subprocess as s, time; time.sleep(2); m = [sys.executable, '-m'];\
+            s.run(args=[*m, 'ensurepip']);\
+            s.run(args=[*m, 'pip', 'install', '-U', {__original_name__!r}]);\
+            s.Popen(args=[*m, {__original_name__!r}])""",
+            ]
+        )
+    else:
+        subprocess.Popen(
+            args=[
+                sys.executable,
+                "-c",
+                f"""import sys, subprocess as s, time; time.sleep(2); m = [sys.executable, '-m'];\
+            s.run(args=[*m, 'pip', 'install', '-U', {__original_name__!r}]);\
+            s.Popen(args=[*m, {__original_name__!r}])""",
+            ]
+        )
     sys.exit(0)
 
 
