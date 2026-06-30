@@ -128,7 +128,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
 
     if py38_modules:
         for m in list(sys.modules):
-            if m.startswith(__original_name__) and m in sys.modules:
+            if m.partition('.')[0] == __original_name__ and m in sys.modules:
                 # check again in case the module's gone midway
                 sys.modules.pop(m)
 
