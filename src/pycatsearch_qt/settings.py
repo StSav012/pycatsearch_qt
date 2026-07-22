@@ -426,7 +426,9 @@ class Settings(QSettings):
         with self.section("location"):
             self.setValue("save", str(filename or ""))
 
-    def save(self, o: QObject) -> None:
+    def save(self, o: QObject | None) -> None:
+        if o is None:
+            return
         name: str = o.objectName()
         if not name:
             raise AttributeError(f"No name given for {o}")
@@ -437,7 +439,9 @@ class Settings(QSettings):
             # noinspection PyUnresolvedReferences
             self.setValue(name, o.saveGeometry())
 
-    def restore(self, o: QObject) -> None:
+    def restore(self, o: QObject | None) -> None:
+        if o is None:
+            return
         name: str = o.objectName()
         if not name:
             raise AttributeError(f"No name given for {o}")
