@@ -6,7 +6,7 @@ from typing import final
 
 from pycatsearch.catalog import Catalog
 from pycatsearch.utils import CatalogType
-from qtpy.QtCore import QItemSelection, QMimeData, QModelIndex, QPoint, Qt, Slot
+from qtpy.QtCore import QItemSelection, QItemSelectionModel, QMimeData, QModelIndex, QPoint, Qt, Slot
 from qtpy.QtGui import QClipboard, QCloseEvent, QCursor, QIcon, QPalette, QPixmap, QScreen
 from qtpy.QtWidgets import (
     QAbstractItemView,
@@ -162,17 +162,19 @@ class UI(QMainWindow):
                 table.setSortingEnabled(True)
                 table.setAlternatingRowColors(True)
                 with the(table.horizontalHeader()) as header:
-                    header.setObjectName("resultsTableHorizontalHeader")
-                    header.setDefaultSectionSize(180)
-                    header.setHighlightSections(False)
-                    header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-                    header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
-                    header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
-                    header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
-                    header.setSectionsMovable(True)
+                    if header is not None:
+                        header.setObjectName("resultsTableHorizontalHeader")
+                        header.setDefaultSectionSize(180)
+                        header.setHighlightSections(False)
+                        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+                        header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+                        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+                        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+                        header.setSectionsMovable(True)
                 with the(table.verticalHeader()) as header:
-                    header.setVisible(False)
-                    header.setHighlightSections(False)
+                    if header is not None:
+                        header.setVisible(False)
+                        header.setHighlightSections(False)
 
             # substance selection
             self._top_matter.addWidget(self.box_substance)
@@ -243,7 +245,9 @@ class UI(QMainWindow):
         self.load_settings()
 
         self.results_table.customContextMenuRequested.connect(self._on_table_context_menu_requested)
-        self.results_table.selectionModel().selectionChanged.connect(self._on_table_item_selection_changed)
+        with the(self.results_table.selectionModel()) as selection_model:
+            if selection_model is not None:
+                selection_model.selectionChanged.connect(self._on_table_item_selection_changed)
         self.results_table.doubleClicked.connect(self._on_action_substance_info_triggered)
         self.spin_intensity.valueChanged.connect(self._on_spin_intensity_changed)
         self.spin_temperature.valueChanged.connect(self._on_spin_temperature_changed)
@@ -373,8 +377,11 @@ class UI(QMainWindow):
 
     @Slot(QItemSelection, QItemSelection)
     def _on_table_item_selection_changed(self, _selected: QItemSelection, _deselected: QItemSelection) -> None:
-        self.menu_bar.action_copy.setEnabled(self.results_table.selectionModel().hasSelection())
-        self.menu_bar.action_substance_info.setEnabled(self.results_table.selectionModel().hasSelection())
+        with the(self.results_table.selectionModel()) as selection_model:
+            if selection_model is not None:
+                has_selection: bool = selection_model.hasSelection()
+                self.menu_bar.action_copy.setEnabled(has_selection)
+                self.menu_bar.action_substance_info.setEnabled(has_selection)
 
     @Slot()
     def _on_action_load_triggered(self) -> None:
@@ -431,7 +438,8 @@ class UI(QMainWindow):
 
         :return: the rich text representation of the selected table lines
         """
-        if not self.results_table.selectionModel().hasSelection():
+        selection_model: QItemSelectionModel | None = self.results_table.selectionModel()
+        if selection_model is None or not selection_model.hasSelection():
             return ""
 
         units: list[str] = [
@@ -451,15 +459,16 @@ class UI(QMainWindow):
                 else self.tr("{value}", "format value in HTML").format(value=value)
             )
 
-        columns_order: list[int] = [
-            self.results_table.horizontalHeader().logicalIndex(_c)
-            for _c, _a in zip(range(self.results_table.horizontalHeader().count()), actions_checked, strict=True)
-            if _a
-        ]
+        with the(self.results_table.horizontalHeader()) as header:
+            columns_order: list[int] = (
+                [header.logicalIndex(_c) for _c, _a in zip(range(header.count()), actions_checked, strict=True) if _a]
+                if header is not None
+                else []
+            )
         text: list[str] = ["<table>"]
         values: list[str]
         index: QModelIndex
-        for index in self.results_table.selectionModel().selectedRows():
+        for index in selection_model.selectedRows():
             row: FoundLinesModel.DataType = self.results_model.row(index.row())
             values = [
                 format_value(_v, _u)
@@ -527,11 +536,11 @@ class UI(QMainWindow):
 
         text_to_copy: list[str] = []
         index: QModelIndex
-        for index in self.results_table.selectionModel().selectedRows(col) or [
-            self.results_table.selectionModel().currentIndex()
-        ]:
-            if index.isValid():
-                text_to_copy.append(self.results_model.data(index) or "")
+        with the(self.results_table.selectionModel()) as selection_model:
+            if selection_model is not None:
+                for index in selection_model.selectedRows(col) or [selection_model.currentIndex()]:
+                    if index.isValid():
+                        text_to_copy.append(self.results_model.data(index) or "")
         if not text_to_copy:
             return
         if col == 0:
@@ -541,7 +550,9 @@ class UI(QMainWindow):
 
     @Slot()
     def _on_action_copy_current_triggered(self) -> None:
-        self.copy_selected_items(self.results_table.selectionModel().currentIndex().column())
+        with the(self.results_table.selectionModel()) as selection_model:
+            if selection_model is not None:
+                self.copy_selected_items(selection_model.currentIndex().column())
 
     @Slot()
     def _on_action_copy_name_triggered(self) -> None:
@@ -569,17 +580,18 @@ class UI(QMainWindow):
 
     @Slot()
     def _on_action_substance_info_triggered(self) -> None:
-        if self.results_table.selectionModel().hasSelection():
-            syn: SubstanceInfo = SubstanceInfo(
-                self.catalog.catalog,
-                self.results_model.row(self.results_table.selectionModel().selectedRows()[0].row()).species_tag,
-                inchi_key_search_url_template=self.settings.inchi_key_search_url_template,
-                parent=self,
-            )
-            try:
-                syn.exec()
-            finally:
-                syn.deleteLater()
+        with the(self.results_table.selectionModel()) as selection_model:
+            if selection_model is not None and selection_model.hasSelection():
+                syn: SubstanceInfo = SubstanceInfo(
+                    self.catalog.catalog,
+                    self.results_model.row(selection_model.selectedRows()[0].row()).species_tag,
+                    inchi_key_search_url_template=self.settings.inchi_key_search_url_template,
+                    parent=self,
+                )
+                try:
+                    syn.exec()
+                finally:
+                    syn.deleteLater()
 
     def toggle_results_table_column_visibility(self, column: int, is_visible: bool) -> None:
         if is_visible != self.results_table.isColumnHidden(column):
