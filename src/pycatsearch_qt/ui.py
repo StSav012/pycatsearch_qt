@@ -1,5 +1,6 @@
 import os
 import sys
+from contextlib import nullcontext as the
 from math import inf
 from pathlib import PurePath
 from typing import final
@@ -49,7 +50,6 @@ from .utils import (
     p_tag,
     remove_html,
     tag,
-    the,
     update_with_pip,
     with_logger,
     wrap_in_html,

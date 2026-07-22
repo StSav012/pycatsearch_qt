@@ -1,8 +1,8 @@
+from contextlib import nullcontext as the
+
 from qtpy.QtCore import QModelIndex, QObject, QPersistentModelIndex, QRect, QSize
 from qtpy.QtGui import QAbstractTextDocumentLayout, QPainter, QPalette, QTextDocument
 from qtpy.QtWidgets import QApplication, QStyle, QStyleOptionViewItem, QStyledItemDelegate
-
-from .utils import the
 
 __all__ = ["HTMLDelegate"]
 

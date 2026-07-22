@@ -5,8 +5,8 @@ import os
 import re
 import sys
 import unicodedata
-from collections.abc import Iterable, Iterator
-from contextlib import contextmanager, suppress
+from collections.abc import Iterable
+from contextlib import suppress
 from logging import Logger, getLogger
 from typing import Any, Protocol, TypeGuard, TypeVar
 
@@ -26,7 +26,6 @@ __all__ = [
     "tag",
     "p_tag",
     "a_tag",
-    "the",
     "icon",
     "with_logger",
 ]
@@ -459,11 +458,6 @@ if sys.version_info < (3, 10, 0):
 
 
 _T = TypeVar("_T")
-
-
-@contextmanager
-def the(obj: _T) -> Iterator[_T]:
-    yield obj
 
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences
