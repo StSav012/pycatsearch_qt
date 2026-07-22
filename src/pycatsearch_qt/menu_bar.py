@@ -82,6 +82,8 @@ class MenuBar(QMenuBar):
             "Ctrl+I",
         )
 
+        self.menu_view: QMenu = self.addMenu(self.tr("&View"))  # to be filled from dock widgets
+
         self.menu_columns: QMenu = self.addMenu(self.tr("&Columns"))
         self.action_show_substance: QAction = self.menu_columns.addAction(self.tr("&Substance"))
         self.action_show_frequency: QAction = self.menu_columns.addAction(self.tr("&Frequency"))

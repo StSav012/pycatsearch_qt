@@ -13,6 +13,7 @@ from qtpy.QtWidgets import (
     QAbstractItemView,
     QAbstractSpinBox,
     QApplication,
+    QDockWidget,
     QDoubleSpinBox,
     QFormLayout,
     QHeaderView,
@@ -20,7 +21,6 @@ from qtpy.QtWidgets import (
     QMessageBox,
     QPushButton,
     QSizePolicy,
-    QSplitter,
     QStatusBar,
     QTableView,
     QVBoxLayout,
@@ -94,21 +94,24 @@ class UI(QMainWindow):
         self.open_dialog: CatalogOpenFileDialog = CatalogOpenFileDialog(settings=self.settings, parent=self)
         self.save_dialog: CatalogSaveFileDialog = CatalogSaveFileDialog(settings=self.settings, parent=self)
 
-        self._central_widget: QSplitter = QSplitter(Qt.Orientation.Vertical, self)
-        self._central_widget.setObjectName("horizontalSplitter")
-        self._top_matter: QSplitter = QSplitter(Qt.Orientation.Horizontal, self._central_widget)
-        self._top_matter.setObjectName("verticalSplitter")
-        self._right_matter: QWidget = QWidget(self._central_widget)
+        self._right_matter: QWidget = QWidget(self)
+        self._right_dock: QDockWidget = QDockWidget(self)
+        self._right_dock.setObjectName("parametersDock")
 
-        self.spin_intensity: FloatSpinBox = FloatSpinBox(self._central_widget)
-        self.spin_temperature: QDoubleSpinBox = QDoubleSpinBox(self._central_widget)
+        self.spin_intensity: FloatSpinBox = FloatSpinBox(self._right_matter)
+        self.spin_temperature: QDoubleSpinBox = QDoubleSpinBox(self._right_matter)
 
-        self.box_substance: SubstanceBox = SubstanceBox(self.catalog.catalog, self.settings, self._central_widget)
-        self.box_frequency: FrequencyBox = FrequencyBox(self.settings, self._central_widget)
-        self.button_search: QPushButton = QPushButton(self._central_widget)
+        self.box_substance: SubstanceBox = SubstanceBox(self.catalog.catalog, self.settings, self)
+        self._substance_dock: QDockWidget = QDockWidget(self)
+        self._substance_dock.setObjectName("substanceDock")
+
+        self.box_frequency: FrequencyBox = FrequencyBox(self.settings, self._right_matter)
+        self.button_search: QPushButton = QPushButton(self)
 
         self.results_model: FoundLinesModel = FoundLinesModel(self.settings, self)
-        self.results_table: QTableView = QTableView(self._central_widget)
+        self.results_table: QTableView = QTableView(self)
+        self._results_dock: QDockWidget = QDockWidget(self)
+        self._results_dock.setObjectName("resultsDock")
 
         self.menu_bar: MenuBar = MenuBar(self)
 
@@ -144,7 +147,7 @@ class UI(QMainWindow):
                 self.setWindowTitle(self.tr("PyCatSearch (version {0})").format(__version__))
             else:
                 self.setWindowTitle(self.tr("PyCatSearch"))
-            self.setCentralWidget(self._central_widget)
+            self.setCentralWidget(self.button_search)
 
             layout_right: QVBoxLayout = QVBoxLayout()
             layout_options: QFormLayout = QFormLayout()
@@ -175,9 +178,6 @@ class UI(QMainWindow):
                     if header is not None:
                         header.setVisible(False)
                         header.setHighlightSections(False)
-
-            # substance selection
-            self._top_matter.addWidget(self.box_substance)
 
             # frequency limits
             layout_right.addWidget(self.box_frequency, 1)
@@ -210,17 +210,39 @@ class UI(QMainWindow):
             layout_right.addLayout(layout_options, 0)
 
             self.button_search.setText(self.tr("Show"))
-            layout_right.addWidget(self.button_search, 0)
 
             self._right_matter.setLayout(layout_right)
-            self._top_matter.addWidget(self._right_matter)
-            self._top_matter.setStretchFactor(0, 1)
-            self._top_matter.setChildrenCollapsible(False)
 
-            self._central_widget.addWidget(self._top_matter)
-            self._central_widget.addWidget(self.results_table)
-            self._central_widget.setStretchFactor(1, 1)
-            self._central_widget.setChildrenCollapsible(False)
+            self.setDockNestingEnabled(True)
+            dockwidget: QDockWidget
+            title: str
+            widget: QWidget
+            area: Qt.DockWidgetArea
+            for dockwidget, title, widget, area in (
+                (
+                    self._substance_dock,
+                    self.tr("Substances"),
+                    self.box_substance,
+                    Qt.DockWidgetArea.TopDockWidgetArea,
+                ),
+                (
+                    self._right_dock,
+                    self.tr("Parameters"),
+                    self._right_matter,
+                    Qt.DockWidgetArea.TopDockWidgetArea,
+                ),
+                (
+                    self._results_dock,
+                    self.tr("Found Lines"),
+                    self.results_table,
+                    Qt.DockWidgetArea.BottomDockWidgetArea,
+                ),
+            ):
+                dockwidget.setWindowTitle(title)
+                dockwidget.setWidget(widget)
+                dockwidget.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+                self.addDockWidget(area, dockwidget)
+                self.menu_bar.menu_view.addAction(dockwidget.toggleViewAction())
 
             self.setMenuBar(self.menu_bar)
             self.setStatusBar(self.status_bar)
@@ -719,8 +741,6 @@ class UI(QMainWindow):
             )
 
         self.settings.restore(self)
-        self.settings.restore(self._top_matter)
-        self.settings.restore(self._central_widget)
         self.settings.restore(self.results_table.horizontalHeader())
         self.fill_parameters()
 
@@ -740,8 +760,6 @@ class UI(QMainWindow):
             self.settings.setValue("lowerStateEnergy", self.menu_bar.action_show_lower_state_energy.isChecked())
 
         self.settings.save(self)
-        self.settings.save(self._top_matter)
-        self.settings.save(self._central_widget)
         self.settings.save(self.results_table.horizontalHeader())
 
         self.box_substance.save_settings()
