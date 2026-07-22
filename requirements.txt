@@ -1,4 +1,4 @@
-PyCatSearch
+PyCatSearch>=5.3.1.1
 packaging>=20
 
 # for the compatibility b/w various Qt versions
