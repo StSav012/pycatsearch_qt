@@ -113,7 +113,6 @@ class MenuBar(QMenuBar):
         self.action_reload.setDisabled(True)
         self.action_save_as.setDisabled(True)
 
-        self.action_show_substance.setCheckable(True)
-        self.action_show_frequency.setCheckable(True)
-        self.action_show_intensity.setCheckable(True)
-        self.action_show_lower_state_energy.setCheckable(True)
+        for action in self.menu_columns.actions():
+            action.setCheckable(True)
+            action.setChecked(True)
