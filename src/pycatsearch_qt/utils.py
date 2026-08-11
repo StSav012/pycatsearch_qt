@@ -229,7 +229,10 @@ def remove_html(line: str) -> str:
 
 
 tag_pattern: re.Pattern[str] = re.compile(
-    r"<\s*(?P<tag_name>\w+)(?:\s+[^>]*)?>(?P<content>.*?)(?:</\s*(?P=tag_name)\s*>|\n|$)"
+    r"<\s*(?P<tag_name>\w+)\s*(?P<attrs>[^>]*)?>(?P<content>.*?)(?:</\s*(?P=tag_name)\s*>|\n|$)"
+)
+size_pattern: re.Pattern[str] = re.compile(
+    r"size\s*=\s*(?P<q>|'|\")\s*(?P<size>\d+)\s*(?:pt)?\s*(?P=q)"
 )
 
 tag_repl: dict[str, str] = {
@@ -263,13 +266,13 @@ def rtf_escape(s: str) -> str:
 def rtf_table(t: str) -> str:
     r: list[str] = [r"\trowd"]
     cols: int = 0
-    for tr, row in tag_pattern.findall(t):
+    for tr, _, row in tag_pattern.findall(t):
         if tr.lower() != "tr":
             continue
         # noinspection PyTypeChecker
         cells: list[tuple[str, str]] = tag_pattern.findall(row)
         cols = max(cols, len(cells))
-        for td, cell in cells:
+        for td, _, cell in cells:
             if td.lower() != "td":
                 continue
             r.append(cell + r"\cell")
@@ -284,7 +287,13 @@ def html_tag_to_rtf_tag(m: re.Match[str]) -> str:
     content: str = m.group("content")
     if tag_name == "table":
         return rtf_table(content)
-    if tag_name == "font":  # do nothing
+    if tag_name == "font":
+        attrs: str | None = m.group("attrs")
+        if attrs is not None:
+            size_match: re.Match[str] | None = size_pattern.search(attrs)
+            if size_match is  not None:
+                return "{\\fs" + str(int(size_match.group("size")) * 2) + "\n" + content + "}"
+        # otherwise, do nothing
         return content
     tag_name = tag_repl.get(tag_name, tag_name)
     return "{\\" + tag_name + "\n" + content + "}"
