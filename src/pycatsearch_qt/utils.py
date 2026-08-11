@@ -310,8 +310,8 @@ def html_to_rtf(htm: str) -> str:
 def wrap_in_html(text: str, line_end: str = os.linesep) -> str:
     """Make a full HTML document out of a piece of the markup."""
     new_text: list[str] = [
-        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">',
-        '<html lang="en" xml:lang="en">',
+        '<!DOCTYPE HTML>',
+        '<html>',
         "<head>",
         '<meta http-equiv="content-type" content="text/html; charset=utf-8">',
         "</head>",
