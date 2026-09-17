@@ -79,13 +79,13 @@ def chem_html(formula: str) -> str:
         return formula
 
     def sub_tag(s: str) -> str:
-        return "<sub>" + s + "</sub>"
+        return tag("sub", s)
 
     def sup_tag(s: str) -> str:
-        return "<sup>" + s + "</sup>"
+        return tag("sup", s)
 
     def i_tag(s: str) -> str:
-        return "<i>" + s + "</i>"
+        return tag("i", s)
 
     def subscript(s: str) -> str:
         number_start: int = -1
@@ -129,7 +129,11 @@ def chem_html(formula: str) -> str:
                 if _c.isdigit() or _c == "<":
                     no_digits = False
                     break
-            if no_digits and (unescaped_prefix[0].islower() or unescaped_prefix[0] == "("):
+            if no_digits and (
+                unescaped_prefix[0].islower()
+                or unescaped_prefix[0] == "("
+                and unescaped_prefix.count("(") == unescaped_prefix.count(")")
+            ):
                 return i_tag(s[:_i]) + s[_i:]
         return s
 
