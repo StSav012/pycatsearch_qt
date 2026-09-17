@@ -72,84 +72,79 @@ def tex_to_html_entity(s: str) -> str:
     return s
 
 
+def subscript(s: str) -> str:
+    number_start: int = -1
+    number_started: bool = False
+    cap_alpha_started: bool = False
+    low_alpha_started: bool = False
+    _i: int = 0
+    while _i < len(s):
+        _c: str = s[_i]
+        if number_started and not _c.isdigit():
+            number_started = False
+            s = s[:number_start] + sub_tag(s[number_start:_i]) + s[_i:]
+            _i += 1
+        if (cap_alpha_started or low_alpha_started) and _c.isdigit() and not number_started:
+            number_start = _i
+            number_started = True
+        if low_alpha_started:
+            cap_alpha_started = False
+            low_alpha_started = False
+        if cap_alpha_started and _c.islower() or _c == ")":
+            low_alpha_started = True
+        cap_alpha_started = _c.isupper()
+        _i += 1
+    if number_started:
+        s = s[:number_start] + sub_tag(s[number_start:])
+    return s
+
+
+def prefix(s: str) -> str:
+    no_digits: bool = False
+    _i: int = len(s)
+    while not no_digits:
+        _i = s.rfind("-", 0, _i)
+        if _i == -1:
+            break
+        if s[:_i].isalpha() and s[:_i].isupper():
+            break
+        no_digits = True
+        _c: str
+        unescaped_prefix: str = html.unescape(s[:_i])
+        for _c in unescaped_prefix:
+            if _c.isdigit() or _c == "<":
+                no_digits = False
+                break
+        if no_digits and (
+            unescaped_prefix[0].islower()
+            or unescaped_prefix[0] == "("
+            and unescaped_prefix.count("(") == unescaped_prefix.count(")")
+        ):
+            return i_tag(s[:_i]) + s[_i:]
+    return s
+
+
+def charge(s: str) -> str:
+    if s[-1] in "+-":
+        return s[:-1] + sup_tag(s[-1])
+    return s
+
+
+def v_or_nu(s: str) -> str:
+    if "=" not in s:
+        return s[0] + " = " + s[1:]
+    ss: list[str] = list(map(str.strip, s.split("=")))
+    for _i in range(len(ss)):
+        if ss[_i].startswith(("v", "ν")):
+            ss[_i] = ss[_i][0] + sub_tag(ss[_i][1:])
+    return " = ".join(ss)
+
+
 def chem_html(formula: str) -> str:
     """Convert plain text chemical formula into HTML markup."""
     if "<" in formula or ">" in formula:
-        # we can not tell whether it's a tag or a mathematical sign
+        # we cannot tell whether it's a tag or a mathematical sign
         return formula
-
-    def sub_tag(s: str) -> str:
-        return tag("sub", s)
-
-    def sup_tag(s: str) -> str:
-        return tag("sup", s)
-
-    def i_tag(s: str) -> str:
-        return tag("i", s)
-
-    def subscript(s: str) -> str:
-        number_start: int = -1
-        number_started: bool = False
-        cap_alpha_started: bool = False
-        low_alpha_started: bool = False
-        _i: int = 0
-        while _i < len(s):
-            _c: str = s[_i]
-            if number_started and not _c.isdigit():
-                number_started = False
-                s = s[:number_start] + sub_tag(s[number_start:_i]) + s[_i:]
-                _i += 1
-            if (cap_alpha_started or low_alpha_started) and _c.isdigit() and not number_started:
-                number_start = _i
-                number_started = True
-            if low_alpha_started:
-                cap_alpha_started = False
-                low_alpha_started = False
-            if cap_alpha_started and _c.islower() or _c == ")":
-                low_alpha_started = True
-            cap_alpha_started = _c.isupper()
-            _i += 1
-        if number_started:
-            s = s[:number_start] + sub_tag(s[number_start:])
-        return s
-
-    def prefix(s: str) -> str:
-        no_digits: bool = False
-        _i: int = len(s)
-        while not no_digits:
-            _i = s.rfind("-", 0, _i)
-            if _i == -1:
-                break
-            if s[:_i].isalpha() and s[:_i].isupper():
-                break
-            no_digits = True
-            _c: str
-            unescaped_prefix: str = html.unescape(s[:_i])
-            for _c in unescaped_prefix:
-                if _c.isdigit() or _c == "<":
-                    no_digits = False
-                    break
-            if no_digits and (
-                unescaped_prefix[0].islower()
-                or unescaped_prefix[0] == "("
-                and unescaped_prefix.count("(") == unescaped_prefix.count(")")
-            ):
-                return i_tag(s[:_i]) + s[_i:]
-        return s
-
-    def charge(s: str) -> str:
-        if s[-1] in "+-":
-            return s[:-1] + sup_tag(s[-1])
-        return s
-
-    def v(s: str) -> str:
-        if "=" not in s:
-            return s[0] + " = " + s[1:]
-        ss: list[str] = list(map(str.strip, s.split("=")))
-        for _i in range(len(ss)):
-            if ss[_i].startswith("v"):
-                ss[_i] = ss[_i][0] + sub_tag(ss[_i][1:])
-        return " = ".join(ss)
 
     html_formula: str = html.escape(formula)
     html_formula_pieces: list[str] = list(map(str.strip, html_formula.split(",")))
@@ -159,7 +154,7 @@ def chem_html(formula: str) -> str:
             break
     for i in range(len(html_formula_pieces)):
         if html_formula_pieces[i].startswith("v"):
-            html_formula_pieces[i] = v(html_formula_pieces[i])
+            html_formula_pieces[i] = v_or_nu(html_formula_pieces[i])
             break
         for function in (subscript, prefix, charge):
             html_formula_pieces[i] = function(html_formula_pieces[i])
@@ -271,7 +266,6 @@ def rtf_table(t: str) -> str:
     for tr, _, row in tag_pattern.findall(t):
         if tr.lower() != "tr":
             continue
-        # noinspection PyTypeChecker
         cells: list[tuple[str, str]] = tag_pattern.findall(row)
         cols = max(cols, len(cells))
         for td, _, cell in cells:
@@ -451,6 +445,18 @@ def tag(name: str, text: str = "", **attrs: str) -> str:
 
 def p_tag(text: str) -> str:
     return tag("p", text)
+
+
+def i_tag(text: str) -> str:
+    return tag("i", text)
+
+
+def sub_tag(text: str) -> str:
+    return tag("sub", text)
+
+
+def sup_tag(text: str) -> str:
+    return tag("sup", text)
 
 
 def a_tag(text: str, url: str) -> str:
