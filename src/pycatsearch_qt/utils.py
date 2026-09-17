@@ -8,26 +8,26 @@ import unicodedata
 from collections.abc import Iterable
 from contextlib import suppress
 from logging import Logger, getLogger
-from typing import Any, Protocol, TypeGuard, TypeVar
+from typing import Any, Protocol, TypeGuard
 
 from pycatsearch.utils import NAME, STOICHIOMETRIC_FORMULA, STRUCTURAL_FORMULA, CatalogEntryType
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QStyle, QWidget
 
 __all__ = [
-    "chem_html",
-    "best_name",
-    "remove_html",
-    "wrap_in_html",
-    "html_to_rtf",
     "ReleaseInfo",
-    "latest_release",
-    "update_with_pip",
-    "tag",
-    "p_tag",
     "a_tag",
+    "best_name",
+    "chem_html",
+    "html_to_rtf",
     "icon",
+    "latest_release",
+    "p_tag",
+    "remove_html",
+    "tag",
+    "update_with_pip",
     "with_logger",
+    "wrap_in_html",
 ]
 
 
@@ -170,7 +170,7 @@ def is_good_html(text: str) -> bool:
 
 def best_name(entry: CatalogEntryType, allow_html: bool = True) -> str:
     species_tag: int = entry.speciestag
-    last: str = best_name.__dict__.get("last", dict()).get(species_tag, dict()).get(allow_html, "")
+    last: str = best_name.__dict__.get("last", {}).get(species_tag, {}).get(allow_html, "")
     if last:
         return last
 
@@ -206,9 +206,9 @@ def best_name(entry: CatalogEntryType, allow_html: bool = True) -> str:
     if not species_tag:
         return res
     if "last" not in best_name.__dict__:
-        best_name.__dict__["last"] = dict()
+        best_name.__dict__["last"] = {}
     if species_tag not in best_name.__dict__["last"]:
-        best_name.__dict__["last"][species_tag] = dict()
+        best_name.__dict__["last"][species_tag] = {}
     best_name.__dict__["last"][species_tag][allow_html] = res
     return res
 
@@ -231,9 +231,7 @@ def remove_html(line: str) -> str:
 tag_pattern: re.Pattern[str] = re.compile(
     r"<\s*(?P<tag_name>\w+)\s*(?P<attrs>[^>]*)?>(?P<content>.*?)(?:</\s*(?P=tag_name)\s*>|\n|$)"
 )
-size_pattern: re.Pattern[str] = re.compile(
-    r"size\s*=\s*(?P<q>|'|\")\s*(?P<size>\d+)\s*(?:pt)?\s*(?P=q)"
-)
+size_pattern: re.Pattern[str] = re.compile(r"size\s*=\s*(?P<q>|'|\")\s*(?P<size>\d+)\s*(?:pt)?\s*(?P=q)")
 
 tag_repl: dict[str, str] = {
     "html": r"rtf1\ansi{\fonttbl\f0\fnil}",
@@ -291,7 +289,7 @@ def html_tag_to_rtf_tag(m: re.Match[str]) -> str:
         attrs: str | None = m.group("attrs")
         if attrs is not None:
             size_match: re.Match[str] | None = size_pattern.search(attrs)
-            if size_match is  not None:
+            if size_match is not None:
                 return "{\\fs" + str(int(size_match.group("size")) * 2) + "\n" + content + "}"
         # otherwise, do nothing
         return content
@@ -310,8 +308,8 @@ def html_to_rtf(htm: str) -> str:
 def wrap_in_html(text: str, line_end: str = os.linesep) -> str:
     """Make a full HTML document out of a piece of the markup."""
     new_text: list[str] = [
-        '<!DOCTYPE HTML>',
-        '<html>',
+        "<!DOCTYPE HTML>",
+        "<html>",
         "<head>",
         '<meta http-equiv="content-type" content="text/html; charset=utf-8">',
         "</head>",
@@ -455,18 +453,15 @@ def a_tag(text: str, url: str) -> str:
     return tag("a", text, href=url)
 
 
-if sys.version_info < (3, 10, 0):
+if sys.version_info < (3, 10, 0):  # noqa: UP036
     import builtins
 
-    # noinspection PyShadowingBuiltins,PyUnusedLocal
+    # noinspection PyShadowingBuiltins
     def zip(*iterables: Iterable[Any], strict: bool = False) -> builtins.zip:
         """Intentionally override `builtins.zip` to ignore the `strict` parameter in Python < 3.10."""
-        return builtins.zip(*iterables)
+        return builtins.zip(*iterables)  # noqa: B905
 
     __all__.append("zip")
-
-
-_T = TypeVar("_T")
 
 
 # noinspection PyPackageRequirements,PyUnresolvedReferences

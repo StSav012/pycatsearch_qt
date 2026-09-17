@@ -57,7 +57,7 @@ class PreferencePage(QScrollArea):
         self._changed_settings: dict[str, Any] = {}
 
         # https://forum.qt.io/post/671245
-        def _on_event(x: bool | int | float | str, *, callback: str) -> None:
+        def _on_event(x: bool | float | str, *, callback: str) -> None:
             self._changed_settings[callback] = x
 
         def _on_combo_box_current_index_changed(_: int, *, sender: QComboBox, callback: str) -> None:

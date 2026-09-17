@@ -25,7 +25,7 @@ class SaveCatalogWaitingScreen(WaitingScreen):
             parent=parent,
             label=QCoreApplication.translate("SaveCatalogWaitingScreen", "Please wait…"),
             target=save_catalog_to_file,
-            kwargs=dict(filename=filename, catalog=catalog, frequency_limits=frequency_limits),
+            kwargs={"filename": filename, "catalog": catalog, "frequency_limits": frequency_limits},
             margins=margins,
             label_alignment=label_alignment,
             cancellable=cancellable,

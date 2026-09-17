@@ -28,7 +28,7 @@ from .selectable_label import SelectableLabel
 from .url_label import URLLabel
 from .utils import best_name, chem_html, icon
 
-__all__ = ["SubstanceInfoSelector", "SubstanceInfo"]
+__all__ = ["SubstanceInfo", "SubstanceInfoSelector"]
 
 
 class SubstanceInfoSelector(QDialog):

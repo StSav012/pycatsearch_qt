@@ -1,5 +1,5 @@
+from collections.abc import Callable
 from math import inf
-from typing import Callable
 
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QAbstractSpinBox, QDoubleSpinBox, QFormLayout, QSizePolicy, QTabWidget, QWidget

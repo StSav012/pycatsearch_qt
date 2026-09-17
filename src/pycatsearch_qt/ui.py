@@ -56,7 +56,7 @@ from .utils import (
 )
 from .waiting_screen import WaitingScreen
 
-if sys.version_info < (3, 10, 0):
+if sys.version_info < (3, 10, 0):  # noqa: UP036
     from .utils import zip
 
 __all__ = ["UI"]
@@ -529,8 +529,6 @@ class UI(QMainWindow):
             self.spin_temperature.blockSignals(True)
             try:
                 self.fill_parameters()
-            except LookupError:
-                raise
             finally:
                 self.box_frequency.blockSignals(False)
                 self.spin_intensity.blockSignals(False)

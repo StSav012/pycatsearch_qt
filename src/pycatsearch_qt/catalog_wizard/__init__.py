@@ -26,7 +26,7 @@ class SaveCatalogWizard(QWizard, abc.ABC, metaclass=_SaveCatalogWizardMeta):
     ) -> None:
         super().__init__(parent)
 
-        self.catalog: CatalogType = dict()
+        self.catalog: CatalogType = {}
         self.default_save_location: PurePath | None = default_save_location
 
         self.save_dialog: CatalogSaveFileDialog = CatalogSaveFileDialog(settings=settings, parent=self)

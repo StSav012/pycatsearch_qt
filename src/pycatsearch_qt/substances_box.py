@@ -1,6 +1,6 @@
 import re
+from collections.abc import Callable
 from contextlib import suppress
-from typing import Callable
 
 from pycatsearch.utils import (
     ISOTOPOLOG,
@@ -115,7 +115,7 @@ class SubstanceBox(QGroupBox):
             except LookupError:
                 list_items[html_name] = {_species_tag}
 
-        list_items: dict[str, set[int]] = dict()
+        list_items: dict[str, set[int]] = {}
         allow_html: bool = self._settings.rich_text_in_formulas
         plain_text_name: str
         species_tag: int
@@ -130,7 +130,9 @@ class SubstanceBox(QGroupBox):
                     if closing_slash_position:
                         flag: re.RegexFlag = re.RegexFlag.NOFLAG
                         for f in filter_text[closing_slash_position + 1 :].casefold():
-                            flag |= {"a": re.A, "i": re.I, "m": re.M, "s": re.S}.get(f, re.RegexFlag.NOFLAG)
+                            flag |= {"a": re.ASCII, "i": re.IGNORECASE, "m": re.MULTILINE, "s": re.DOTALL}.get(
+                                f, re.RegexFlag.NOFLAG
+                            )
                         pattern = re.compile(filter_text[1:closing_slash_position], flag)
                     else:
                         pattern = re.compile(filter_text[1:])

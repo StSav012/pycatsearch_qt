@@ -6,6 +6,7 @@ from contextlib import suppress
 from datetime import datetime, timedelta, timezone
 from functools import partialmethod
 from pathlib import Path
+from typing import Any
 
 from packaging.version import Version
 from qtpy import PYSIDE2, QT6
@@ -13,7 +14,7 @@ from qtpy.QtCore import QLibraryInfo, QLocale, QTranslator, Qt, qVersion
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QAbstractSpinBox, QApplication, QDialog, QMenu
 
-__all__ = ["qta_icon", "main"]
+__all__ = ["main", "qta_icon"]
 
 __author__ = "StSav012"
 __original_name__ = "pycatsearch_qt"
@@ -62,7 +63,7 @@ if sys.version_info < (3, 10, 0) and __file__ != "<string>":
                     exec(substituted_module, module.__dict__)
                 else:
                     for sub_module in substituted_module:
-                        self._modules[".".join((module_name, sub_module))] = substituted_module[sub_module]
+                        self._modules[f"{module_name}.{sub_module}"] = substituted_module[sub_module]
                     exec(substituted_module.get("__init__", ""), module.__dict__)
 
             def get_filename(self, fullname: str) -> str:
@@ -151,7 +152,7 @@ def _make_old_qt_compatible_again() -> None:
     def to_iso_format(s: str) -> str:
         if sys.version_info < (3, 11, 0):
             import re
-            from typing import Callable
+            from collections.abc import Callable
 
             if s.endswith("Z"):
                 # '2011-11-04T00:05:23Z'
@@ -196,10 +197,10 @@ def _make_old_qt_compatible_again() -> None:
                 r"(?P<offset>[+\-].+)?": from_iso_calendar,
             }
             match: re.Match[str] | None
-            for _p in patterns:
+            for _p, _c in patterns.items():
                 match = re.fullmatch(_p, s)
                 if match is not None:
-                    return patterns[_p](match)
+                    return _c(match)
 
         return s
 
@@ -237,7 +238,7 @@ def _make_old_qt_compatible_again() -> None:
             from qtpy.QtGui import QKeySequence
             from qtpy.QtWidgets import QAction, QToolBar, QWidget
 
-            def add_action(self: QWidget, *args: object, old_add_action: Callable[..., QAction]) -> QAction:
+            def add_action(self: QWidget, *args: Any, old_add_action: Callable[..., QAction]) -> QAction:
                 action: QAction
                 icon: QIcon
                 text: str
@@ -246,7 +247,9 @@ def _make_old_qt_compatible_again() -> None:
                 member: bytes
                 if all(
                     isinstance(arg, t)
-                    for arg, t in zip(args, [str, (QKeySequence, QKeySequence.StandardKey, str, int), QObject, bytes])
+                    for arg, t in zip(
+                        args, [str, (QKeySequence, QKeySequence.StandardKey, str, int), QObject, bytes], strict=False
+                    )
                 ):
                     if len(args) == 2:
                         text, shortcut = args
@@ -265,7 +268,9 @@ def _make_old_qt_compatible_again() -> None:
                 if all(
                     isinstance(arg, t)
                     for arg, t in zip(
-                        args, [QIcon, str, (QKeySequence, QKeySequence.StandardKey, str, int), QObject, bytes]
+                        args,
+                        [QIcon, str, (QKeySequence, QKeySequence.StandardKey, str, int), QObject, bytes],
+                        strict=False,
                     )
                 ):
                     if len(args) == 3:
@@ -371,7 +376,7 @@ def main() -> int:
         datefmt="%Y-%m-%dT%H-%M-%S",
         format="%(levelname)s:%(asctime)s:%(name)s:%(message)s",
     )
-    logging.debug(f"logging level set to {logging.root.level}")
+    logging.root.debug(f"logging level set to {logging.root.level}")
 
     window: UI = UI(*args.catalog)
     window.show()

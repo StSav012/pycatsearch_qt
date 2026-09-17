@@ -1,8 +1,8 @@
-from collections.abc import Hashable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from contextlib import contextmanager, suppress
 from os import PathLike, linesep
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Final, NamedTuple
+from typing import TYPE_CHECKING, Final, NamedTuple
 
 from pycatsearch.utils import (
     cm_per_molecule_to_log10_sq_nm_mhz,

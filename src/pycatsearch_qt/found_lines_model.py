@@ -1,5 +1,6 @@
 import enum
-from typing import Callable, Final
+from collections.abc import Callable
+from typing import Final
 
 from pycatsearch.utils import CatalogType
 from qtpy.QtCore import QAbstractTableModel, QLocale, QModelIndex, QPersistentModelIndex, Qt
@@ -16,16 +17,16 @@ class FoundLinesModel(QAbstractTableModel):
 
     class DataType:
         __slots__ = [
-            "precision",
-            "decimal_point",
-            "species_tag",
-            "name",
-            "frequency",
-            "intensity",
-            "lower_state_energy",
             "_frequency_str",
             "_intensity_str",
             "_lower_state_energy_str",
+            "decimal_point",
+            "frequency",
+            "intensity",
+            "lower_state_energy",
+            "name",
+            "precision",
+            "species_tag",
         ]
 
         def __init__(
@@ -174,7 +175,7 @@ class FoundLinesModel(QAbstractTableModel):
         return False
 
     def clear(self) -> None:
-        self.set_entries(dict())
+        self.set_entries({})
 
     def set_entries(self, entries: CatalogType) -> None:
         from_mhz: Callable[[float], float] = self._settings.from_mhz
@@ -188,7 +189,7 @@ class FoundLinesModel(QAbstractTableModel):
         self.beginResetModel()
         rich_text_in_formulas: bool = self._settings.rich_text_in_formulas
         self._data = list(
-            set(
+            {
                 FoundLinesModel.DataType(
                     precision=precision,
                     decimal_point=decimal_point,
@@ -200,7 +201,7 @@ class FoundLinesModel(QAbstractTableModel):
                 )
                 for species_tag in entries
                 for line in entries[species_tag].lines
-            )
+            }
         )
         self._rows_loaded = FoundLinesModel.ROW_BATCH_COUNT
         self.endResetModel()

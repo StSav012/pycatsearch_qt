@@ -265,7 +265,7 @@ class SaveFileDialog(FileDialog):
                 if any(filename_suffixes.endswith(ext) for ext in supported_name_filter.file_extensions):
                     selected_filter = filter_
                     if not selected_ext and supported_name_filter.file_extensions:
-                        selected_ext = list(supported_name_filter.file_extensions)[0]
+                        selected_ext = next(iter(supported_name_filter.file_extensions))
 
         supported_mimetypes: list[str] = []
         mimetype: str | None

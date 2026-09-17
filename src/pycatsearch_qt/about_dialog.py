@@ -99,10 +99,8 @@ class AboutBox(QDialog):
                     + tag(
                         "tbody",
                         "".join(
-                            map(
-                                lambda s: tr_tag(td_tag(tag("tt", s[0])) + td_tag(s[1], align="center")),
-                                sorted(third_party_modules, key=lambda s: (s[0].casefold(), s[1])),
-                            )
+                            tr_tag(td_tag(tag("tt", s[0])) + td_tag(s[1], align="center"))
+                            for s in sorted(third_party_modules, key=lambda s: (s[0].casefold(), s[1]))
                         ),
                     ),
                     width="100%",
