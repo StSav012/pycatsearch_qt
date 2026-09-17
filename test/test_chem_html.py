@@ -5,6 +5,7 @@ from src.pycatsearch_qt.utils import chem_html
 
 def test_chem_html() -> None:
     assert (c := html.unescape(chem_html("H2O"))) == "H<sub>2</sub>O", c
+    assert (c := html.unescape(chem_html("O-17-O, v=0"))) == "O-17-O, v = 0", c
     assert (c := html.unescape(chem_html("gG'g'-CH3CHOHCH2OH"))) == "<i>gG'g'</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
     assert (c := html.unescape(chem_html("gGpgp-CH3CHOHCH2OH"))) == "<i>gGpgp</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
     assert (c := html.unescape(chem_html("gGpgp-CH3CHOHCH2OH"))) == "<i>gGpgp</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c

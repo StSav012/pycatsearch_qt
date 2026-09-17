@@ -135,7 +135,7 @@ def v_or_nu(s: str) -> str:
         return s[0] + " = " + s[1:]
     ss: list[str] = list(map(str.strip, s.split("=")))
     for _i in range(len(ss)):
-        if ss[_i].startswith(("v", "ν")):
+        if ss[_i].startswith(("v", "ν")) and ss[_i][1:]:
             ss[_i] = ss[_i][0] + sub_tag(ss[_i][1:])
     return " = ".join(ss)
 
