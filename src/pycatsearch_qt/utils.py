@@ -230,6 +230,9 @@ def remove_html(line: str) -> str:
 tag_pattern: re.Pattern[str] = re.compile(
     r"<\s*(?P<tag_name>\w+)\s*(?P<attrs>[^>]*)?>(?P<content>.*?)(?:</\s*(?P=tag_name)\s*>|\n|$)"
 )
+empty_tag_pattern: re.Pattern[str] = re.compile(
+    r"<\s*(?P<tag_name>\w+)\s*(?P<attrs>[^>]*)?\s*/>"
+)
 size_pattern: re.Pattern[str] = re.compile(r"size\s*=\s*(?P<q>|'|\")\s*(?P<size>\d+)\s*(?:pt)?\s*(?P=q)")
 
 tag_repl: dict[str, str] = {
@@ -300,6 +303,9 @@ def html_to_rtf(htm: str) -> str:
     htm, n = tag_pattern.subn(html_tag_to_rtf_tag, htm)
     while n:
         htm, n = tag_pattern.subn(html_tag_to_rtf_tag, htm)
+    htm, n = empty_tag_pattern.subn("", htm)
+    while n:
+        htm, n = empty_tag_pattern.subn("", htm)
     return rtf_escape(html.unescape(htm))
 
 
