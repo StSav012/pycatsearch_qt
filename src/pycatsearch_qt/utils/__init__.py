@@ -10,6 +10,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QStyle, QWidget
 
 from ._html import a_tag, chem_html, is_good_html, p_tag, remove_html, tag, tex_to_html_entity, wrap_in_html
+from ._ods import html_to_ods, ods_object_descriptor
 from ._rtf import html_to_rtf
 
 __all__ = [
@@ -17,9 +18,11 @@ __all__ = [
     "a_tag",
     "best_name",
     "chem_html",
+    "html_to_ods",
     "html_to_rtf",
     "icon",
     "latest_release",
+    "ods_object_descriptor",
     "p_tag",
     "remove_html",
     "tag",

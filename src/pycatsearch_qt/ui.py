@@ -45,8 +45,10 @@ from .substances_box import SubstanceBox
 from .utils import (
     ReleaseInfo,
     a_tag,
+    html_to_ods,
     html_to_rtf,
     latest_release,
+    ods_object_descriptor,
     p_tag,
     remove_html,
     tag,
@@ -72,7 +74,11 @@ def copy_to_clipboard(text: str, text_type: Qt.TextFormat | str = Qt.TextFormat.
     if isinstance(text_type, str):
         mime_data.setData(text_type, text.encode())
     elif text_type == Qt.TextFormat.RichText:
-        mime_data.setData("text/rtf", html_to_rtf(tag("html", tag("font", text, size="10pt"))).encode("utf-8"))
+        mime_data.setData(
+            'application/x-openoffice-embed-source-xml;windows_formatname="Star Embed Source (XML)"',
+            html_to_ods(wrap_in_html(text)),
+        )
+        mime_data.setData(*ods_object_descriptor(displayname="clipboard.ods"))
         mime_data.setData("text/rtf", html_to_rtf(tag("html", text)).encode("utf-8"))
         mime_data.setHtml(wrap_in_html(text))
         mime_data.setText(remove_html(text))
