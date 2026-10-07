@@ -16,6 +16,10 @@ def test_chem_html() -> None:
         c := html.unescape(chem_html("HNO3, 2v5+v9=2"))
     ) == "HNO<sub>3</sub>, 2 v<sub>5</sub> + v<sub>9</sub> = 2", c
     assert (c := html.unescape(chem_html("O-18-Kv2, vt=3"))) == "O-18-Kv<sub>2</sub>, v<sub>t</sub> = 3", c
+    assert (c := html.unescape(chem_html("AG-n-C4H9CN"))) == "<i>AG</i>-<i>n</i>-C<sub>4</sub>H<sub>9</sub>CN", c
+    assert (
+        c := html.unescape(chem_html("GGag'g'-CH2(OH)CH(OH)CH2OH"))
+    ) == "<i>GGag'g'</i>-CH<sub>2</sub>(OH)CH(OH)CH<sub>2</sub>OH", c
 
 
 if __name__ == "__main__":
