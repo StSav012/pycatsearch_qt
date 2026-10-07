@@ -1,7 +1,7 @@
 from contextlib import nullcontext as the
 
 from qtpy.QtCore import QModelIndex, QObject, QPersistentModelIndex, QRect, QSize
-from qtpy.QtGui import QAbstractTextDocumentLayout, QPainter, QPalette, QTextDocument
+from qtpy.QtGui import QAbstractTextDocumentLayout, QPainter, QPalette, QTextDocument, QTextOption
 from qtpy.QtWidgets import QApplication, QStyle, QStyleOptionViewItem, QStyledItemDelegate
 
 __all__ = ["HTMLDelegate"]
@@ -11,6 +11,9 @@ class HTMLDelegate(QStyledItemDelegate):
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._doc: QTextDocument = QTextDocument(self)
+        to: QTextOption = QTextOption()
+        to.setWrapMode(QTextOption.WrapMode.NoWrap)
+        self._doc.setDefaultTextOption(to)
 
     def paint(
         self,
@@ -45,8 +48,11 @@ class HTMLDelegate(QStyledItemDelegate):
         with the(self._doc) as doc:
             doc.clear()
             doc.setHtml(options.text)
-            doc.setTextWidth(options.rect.width())
-            return QSize(
-                round(doc.idealWidth()),
-                round(QTextDocument().size().height()),
+            doc.adjustSize()
+            style: QStyle | None = option.widget.style() if option.widget else QApplication.style()
+            tick_width: float = (
+                style.subElementRect(QStyle.SubElement.SE_ItemViewItemText, options).left()
+                if style is not None
+                else doc.size().height()
             )
+            return QSize(round(doc.textWidth() + tick_width), round(doc.size().height()))
