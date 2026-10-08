@@ -87,6 +87,17 @@ def subscript(s: str) -> str:
     return s
 
 
+isotope_pattern: re.Pattern[str] = re.compile(r"(?P<par>\()?(?P<element>[A-Z][a-z]?)-(?P<mass>\d+)(?(par)\)|-?)")
+
+
+def _isotope_repl(m: re.Match[str]) -> str:
+    return sup_tag(m["mass"]) + m["element"]
+
+
+def isotope(s: str) -> str:
+    return isotope_pattern.sub(_isotope_repl, s)
+
+
 def prefix(s: str) -> str:
     parts: list[str] = s.split("-")
     for i in range(len(parts) - 1, -1, -1):
@@ -144,7 +155,7 @@ def chem_html(formula: str) -> str:
             html_formula_pieces = html_formula_pieces[:i] + [", ".join(html_formula_pieces[i:])]
             break
     for i in range(len(html_formula_pieces)):
-        for function in (subscript, prefix, charge, v_or_nu):
+        for function in (subscript, isotope, prefix, charge, v_or_nu):
             html_formula_pieces[i] = function(html_formula_pieces[i])
     return ", ".join(html_formula_pieces)
 
