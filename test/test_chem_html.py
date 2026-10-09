@@ -19,6 +19,9 @@ def test_chem_html() -> None:
     assert (
         c := chem_html("GGag'g'-CH2(OH)CH(OH)CH2OH")
     ) == "<i>GGag'g'</i>-CH<sub>2</sub>(OH)CH(OH)CH<sub>2</sub>OH", c
+    assert (
+        c := chem_html(r"H2NC(O)NH2, v2\&v3")
+    ) == "H<sub>2</sub>NC(O)NH<sub>2</sub>, v<sub>2</sub> &amp; v<sub>3</sub>", c
 
 
 if __name__ == "__main__":
