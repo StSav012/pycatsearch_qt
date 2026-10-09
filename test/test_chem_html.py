@@ -7,7 +7,7 @@ def test_chem_html() -> None:
     assert (c := chem_html("O-17-O, v=0")) == "<sup>17</sup>OO, v = 0", c
     assert (c := chem_html("O3, v1,3+v2")) == "O<sub>3</sub>, v<sub>1,3</sub> + v<sub>2</sub>", c
     assert (c := chem_html("H3+")) == "H<sub>3</sub><sup>+</sup>", c
-    assert (c := chem_html("gG'g'-CH3CHOHCH2OH")) == "<i>gG&#x27;g&#x27;</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
+    assert (c := chem_html("gG'g'-CH3CHOHCH2OH")) == "<i>gG'g'</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
     assert (c := chem_html("gGpgp-CH3CHOHCH2OH")) == "<i>gGpgp</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
     assert (c := chem_html("gGpgp-CH3CHOHCH2OH")) == "<i>gGpgp</i>-CH<sub>3</sub>CHOHCH<sub>2</sub>OH", c
     assert (c := chem_html("(O-18)2")) == "<sup>18</sup>O<sub>2</sub>", c
@@ -18,7 +18,7 @@ def test_chem_html() -> None:
     assert (c := chem_html("AG-n-C4H9CN")) == "<i>AG</i>-<i>n</i>-C<sub>4</sub>H<sub>9</sub>CN", c
     assert (
         c := chem_html("GGag'g'-CH2(OH)CH(OH)CH2OH")
-    ) == "<i>GGag&#x27;g&#x27;</i>-CH<sub>2</sub>(OH)CH(OH)CH<sub>2</sub>OH", c
+    ) == "<i>GGag'g'</i>-CH<sub>2</sub>(OH)CH(OH)CH<sub>2</sub>OH", c
 
 
 if __name__ == "__main__":
